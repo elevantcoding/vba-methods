@@ -1,2 +1,2 @@
 # vba-methods
-Practical VBA code.
+Practical / inventive VBA code.
