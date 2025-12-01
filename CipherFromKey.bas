@@ -6,7 +6,7 @@ Function GetRandomizedCipherFromKey() As String
 
     ' create a randomized cipher that is relative to the key: get ascii value of the character in the key, cipher character must be one of the characters
     ' in the key, that has not yet been used and match the evenness or oddness of the key character value
-    ' i.e. if a = ascii value = 97 (which is an odd number) then the character that corresponds to a must also have an ascii value that is odd
+    ' i.e. if a = ascii value = 97 (which is an odd number), the cipher character must also have an ascii value that is odd
     
     ' A to Z: 65 - 90
     ' a to z: 97 - 122
@@ -65,4 +65,5 @@ Function GetRandomizedCipherFromKey() As String
     GetRandomizedCipherFromKey = rndcipher
 
 End Function
+
 
