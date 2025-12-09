@@ -11,7 +11,7 @@ Option Explicit
 ' DecipherString reverses the obfuscation to the original string value.
 '---------------------------------------------------------------------------------------------------------------------------------------------------
 Const ModName As String = "StringCipher"
-Function ValidHexValues(ByVal myhexstring) As Boolean
+Function ValidHexValues(ByVal myhexstring As String) As Boolean
     
     'return true if every 2 chars can be evaluated as hex value
     Dim char As String, i As Long, isvalidhex As Boolean
@@ -484,6 +484,7 @@ Sub ValidateXorRange()
     
     Debug.Print "finished: " & C & " results"
 End Sub
+
 
 
 
