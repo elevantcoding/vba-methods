@@ -10,7 +10,7 @@ Option Explicit
 ' this obfuscation results in a 256-length string of hex values (128 chars).
 ' DecipherString reverses the obfuscation to the original string value.
 '---------------------------------------------------------------------------------------------------------------------------------------------------
-Const ModName As String = "GitHub"
+Const ModName As String = "StringCipher"
 Function ValidHexValues(ByVal myhexstring) As Boolean
     
     'return true if every 2 chars can be evaluated as hex value
@@ -92,7 +92,7 @@ Function GetAlterVals(ByVal getvals As String, ByVal cipher As Boolean) As Strin
     ' applies a reversible alternating +/- 1 transformation to a numeric string.
     
     ' getvals:
-    '   a numeric string (digits 0–9 only).
+    '   a numeric string (digits 0â€“9 only).
     ' cipher:
     '   True  ? apply +1 to odd positions, -1 to even positions
     '   False ? apply -1 to odd positions, +1 to even positions
@@ -132,7 +132,7 @@ Function GenerateCiph() As String
     '   subset ascii 58 - 126 only
     '   uses GetRandChar
     
-    ' this cipher is used by NumCipher to reversibly map digits 0–9
+    ' this cipher is used by NumCipher to reversibly map digits 0â€“9
     ' into symbolic characters for prefix obfuscation.
     ' use Randomize in the calling procedure to ensure non-repeating sequences.
     Dim ciph As String, i As Long, char As String
@@ -162,7 +162,7 @@ Function NumCipher(ByVal chars As String, ByVal cipher As Boolean, ByVal ciph As
     '   chars = "101", cipher = True,  ciph = "ZNdfLMsrb~"  ? result = "NZN"
     '   chars = "NZN", cipher = False, ciph = "ZNdfLMsrb~"  ? result = "101"'
     ' assumptions:
-    '   encoding only accepts digits 0–9.
+    '   encoding only accepts digits 0â€“9.
     '   cipher string must be exactly 10 characters.
     Dim i As Long, k As Long, C As Long, char As String, Result As String
     
@@ -466,8 +466,8 @@ End Function
 Sub ValidateXorRange()
 
     ' validation:
-    ' confirms that Xor applied to any printable ascii character 32–255
-    ' using numeric keys 0–9 never produces a value below 32 or above 255
+    ' confirms that Xor applied to any printable ascii character 32â€“255
+    ' using numeric keys 0â€“9 never produces a value below 32 or above 255
     ' this guarantees XOR-based cipher output always remains printable
     Dim i As Long, k As Long, x As Long, C As Long
     
@@ -484,6 +484,7 @@ Sub ValidateXorRange()
     
     Debug.Print "finished: " & C & " results"
 End Sub
+
 
 
 
