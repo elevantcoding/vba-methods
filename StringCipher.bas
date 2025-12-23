@@ -333,6 +333,9 @@ Function DecipherString(ByVal myCipherstring As String) As String
     ' static values
     Const prefixlen As Long = 21
     Const maxstrlen As Long = 128
+
+    ' trim
+    myCipherstring = Trim(myCipherstring)
     
     ' nothing to decipher
     If Len(myCipherstring) = 0 Then Exit Function
@@ -342,9 +345,6 @@ Function DecipherString(ByVal myCipherstring As String) As String
         MsgBox myCipherstring & " does not contain valid or all valid hex values to decipher.", vbInformation, "DecipherString"
         Exit Function
     End If
-    
-    ' trim
-    myCipherstring = Trim(myCipherstring)
     
     ' get chars from hex
     stringtoDecipher = ""
@@ -484,6 +484,7 @@ Sub ValidateXorRange()
     
     Debug.Print "finished: " & C & " results"
 End Sub
+
 
 
 
