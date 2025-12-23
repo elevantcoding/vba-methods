@@ -202,12 +202,9 @@ Function CipherString(ByVal myTextstring As String) As String
     
     ' default value
     CipherString = ""
-    
+
     ' nothing to cipher
     If Len(myTextstring) = 0 Then Exit Function
-    
-    ' trim string
-    stringtoCipher = Trim(myTextstring)
     
     Randomize
     ' get a 6-digit random value, 0 to 999,999
@@ -334,6 +331,9 @@ Function DecipherString(ByVal myCipherstring As String) As String
     Const prefixlen As Long = 21
     Const maxstrlen As Long = 128
 
+    ' default value
+    DecipherString = ""
+    
     ' trim
     myCipherstring = Trim(myCipherstring)
     
@@ -484,6 +484,7 @@ Sub ValidateXorRange()
     
     Debug.Print "finished: " & C & " results"
 End Sub
+
 
 
 
