@@ -355,7 +355,7 @@ Function DecipherString(ByVal myCipherstring As String) As String
     ' get prefix
     prefix = Left(stringtoDecipher, prefixlen)
 
-' get the numeric cipher from the prefix and trim from prefix
+    ' get the numeric cipher from the prefix and trim from prefix
     numciph = Right(prefix, 10)
     prefix = Left(prefix, Len(prefix) - 10)
     
@@ -487,6 +487,7 @@ Sub ValidateXorRange()
     
     Debug.Print "finished: " & C & " results"
 End Sub
+
 
 
 
