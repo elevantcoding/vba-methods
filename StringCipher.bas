@@ -354,14 +354,17 @@ Function DecipherString(ByVal myCipherstring As String) As String
     
     ' get prefix
     prefix = Left(stringtoDecipher, prefixlen)
-        
-    ' get the numeric cipher from the prefix and trim from prefix
+
+' get the numeric cipher from the prefix and trim from prefix
     numciph = Right(prefix, 10)
     prefix = Left(prefix, Len(prefix) - 10)
     
+    ' decipher using numcipher
+    prefix = NumCipher(prefix, False, numciph)
+    
     ' work from the right:
-    ' get 3-digits for string length, deciphering the three digits using NumCipher, assign to strLen
-    chars = NumCipher(Right(prefix, 3), False, numciph)
+    ' get 3-digits for string length
+    chars = Right(prefix, 3)
     If Not chars Like "###" Then
         MsgBox "Value of string length not found in prefix.", vbInformation, "DecipherString"
         Exit Function
@@ -375,8 +378,8 @@ Function DecipherString(ByVal myCipherstring As String) As String
     ' trim string length from prefix
     prefix = Left(prefix, Len(prefix) - 3)
     
-    ' get v, deciphering it using NumCipher, assign to v
-    char = NumCipher(Right(prefix, 1), False, numciph)
+    ' get v
+    char = Right(prefix, 1)
     If Not (char Like "#") Then
         MsgBox "Value of v not found in prefix.", vbInformation, "DecipherString"
         Exit Function
@@ -387,8 +390,8 @@ Function DecipherString(ByVal myCipherstring As String) As String
     ' trim v from prefix
     prefix = Left(prefix, Len(prefix) - 1)
         
-    ' get randval from prefix, decipher using NumCipher, assign to randval
-    char = NumCipher(Right(prefix, 1), False, numciph)
+    ' get randval from prefix
+    char = Right(prefix, 1)
     If Not (char Like "#") Then
         MsgBox "Random value not found in prefix.", vbInformation, "DecipherString"
         Exit Function
@@ -400,12 +403,12 @@ Function DecipherString(ByVal myCipherstring As String) As String
     prefix = Left(prefix, Len(prefix) - 1)
     
     ' get altervals from prefix, decipher using NumCipher, assign to altervals
-    altervals = NumCipher(prefix, False, numciph)
+    altervals = prefix
     If Len(altervals) <> 6 Then
         MsgBox "Random values for string alteration not found in prefix.", vbInformation, "DecipherString"
         Exit Function
     End If
-    
+
     ' remove prefix from string from stringtoDecipher, leaving actual ciphered string chars
     paddedString = Right(stringtoDecipher, Len(stringtoDecipher) - prefixlen)
     
@@ -484,6 +487,7 @@ Sub ValidateXorRange()
     
     Debug.Print "finished: " & C & " results"
 End Sub
+
 
 
 
