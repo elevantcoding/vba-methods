@@ -3,7 +3,7 @@ Cross-platform encryption system (SQL / VBA / Python)
 
 This folder contains cross-plataform encryption utilities designed to operate consistently across:
 - ** SQL Server (T-SQL)**
-- ** VBA / Microsft Access**
+- ** VBA / Microsoft Access**
 - ** Python**
 - The goal of this design is deterministic compatibility
 - data encrypted in one environment can be decrypted correctly in the others.
