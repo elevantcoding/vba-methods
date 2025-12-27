@@ -466,7 +466,7 @@ Function DecipherString(ByVal myCipherstring As String) As String
     DecipherString = stringtoDecipher
 
 End Function
-Sub ValidateXorRange()
+Function ValidateXorRange() As Long
 
     ' validation:
     ' confirms that Xor applied to any printable ascii character 32–255
@@ -484,9 +484,9 @@ Sub ValidateXorRange()
             End If
         Next
     Next
-    
-    Debug.Print "finished: " & C & " results"
+    ValidateXorRange = C
 End Sub
+
 
 
 
