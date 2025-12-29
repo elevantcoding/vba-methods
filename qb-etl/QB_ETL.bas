@@ -6,7 +6,7 @@
 '   - Reference: Microsoft DAO x.x Object Library
 '
 ' External Dependencies:
-'   - ADOConnect  As String   ' SQL Server connection string
+'   - ADOConnect  As String  ' SQL Server connection string
 '   - DisplayMsg             ' UI messaging helper (vba-sql-methods/Interaction.bas)
 '   - MsgFrm                 ' Message form instance (vba-sql-methods/Interaction.bas)
 '   - CloseMsgFrm            ' Closes message form (vba-sql-methods/Interaction.bas)
