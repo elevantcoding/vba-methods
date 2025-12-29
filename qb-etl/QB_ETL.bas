@@ -293,9 +293,7 @@ Finally:
         Set recordsQB = Nothing
     End If
     
-    If Not cSQLCmd Is Nothing Then
-        Set cSQLCmd = Nothing
-    End If
+    If Not cSQLCmd Is Nothing Then Set cSQLCmd = Nothing
     Exit Function
     
 Except:
