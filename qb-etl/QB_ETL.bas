@@ -16,6 +16,8 @@
 '   ODBC-linked QuickBooks queries into SQL Server tables
 '   using schema-driven SQL and parameterized ADO commands.
 '   This ETL pipeline does not rely on saved Access queries.
+'   Additionally, one sub that creates a QB-importable .iif
+'   file from a SQL table.
 
 ' All source datasets are implemented as VBA functions that return SQL statements.  
 ' For date-based SQL, at runtime, the ETL engine resolves and executes the appropriate dataset function using `Eval()`.
@@ -306,3 +308,114 @@ Except:
     Resume Finally
 
 End Function
+
+Sub CreateQBFile(ByVal strCardName As String, ByVal strFrom As String, ByVal strTo As String)
+    On Error GoTo Except
+    
+    ' Export allocated credit card transactions from SQL Server
+    ' into a QuickBooks-compatible IIF file for batch import.
+    
+    ' write file to desktop
+
+    Dim stream As Object
+    
+    Dim strFileName As String
+    Dim strFilePath As String
+    Dim strQBFileName As String
+    Dim strSQL As String
+    Dim strInfo As String
+    
+    Dim adors As ADODB.Recordset
+    Dim adofld As ADODB.Field
+    
+    Dim lrowCount As Long
+    Dim lbatchSize As Long
+    
+    lbatchSize = 200
+    
+    ' transaction view designed for export as iif
+    strSQL = "SELECT qb.TRNS, qb.TRNSID, qb.TRANSTYPE, qb.[Date], qb.ACCT, qb.QBVENDOR, qb.CLASS, qb.AMOUNT, qb.DOCNUM, qb.MEMO " & _
+        "FROM View_CreditCards_QuickBooksAllocations_IIF qb " & _
+        "WHERE qb.CardName = '" & strCardName & "' ORDER BY qb.[TYPE], qb.ID, qb.TRNS DESC;"
+
+    Set adors = New ADODB.Recordset
+    
+    Call OpenSQL
+    adors.open strSQL, SQLConnect, adOpenForwardOnly, adLockReadOnly
+    
+    ' if no records, notify and exit
+    If adors.EOF Then
+        MsgBox StrConv(strCardName, vbProperCase) & " has no records in the allocation table.", vbOKOnly + vbInformation, "No Records"
+        GoTo ExitProcessing
+    End If
+    
+    Call DisplayMsg(, "Generating File")
+    DoCmd.RepaintObject acForm, MsgFrm
+    DoEvents
+    
+    ' text file information
+    strFileName = "QB_" & strCardName & "_Transactions_" & Format(strFrom, "mmddyyyy") & "to" & Format(strTo, "mmddyyyy") & ".txt"
+    strFilePath = Environ("USERPROFILE") & "\Desktop\"
+
+    ' open textstream
+    Set stream = fso.CreateTextFile(strFilePath & strFileName, True)
+    
+    ' write lines of header information for QB
+    stream.WriteLine "!HDR" & Chr(9) & "PROD" & Chr(9) & "VER" & Chr(9) & "REL" & Chr(9) & "IIFVER" & Chr(9) & "DATE" & Chr(9) & "TIME" & Chr(9) & "ACCNTNTSPLITTIME"
+    stream.WriteLine "HDR" & Chr(9) & "QuickBooks Enterprise Solutions" & Chr(9) & "Release R3P" & Chr(9) & "1" & Chr(9) & "" & Format(Now(), "m/d/yyyy") & "" & Chr(9) & "" & Format(Now(), "Short Time") & "" & Chr(9) & "N" & Chr(9) & "0"
+    stream.WriteLine "!TRNS" & Chr(9) & "TRNSID" & Chr(9) & "TRNSTYPE" & Chr(9) & "DATE" & Chr(9) & "ACCNT" & Chr(9) & "NAME" & Chr(9) & "CLASS" & Chr(9) & "AMOUNT" & Chr(9) & "DOCNUM" & Chr(9) & "MEMO"
+    stream.WriteLine "!SPL" & Chr(9) & "SPLID" & Chr(9) & "TRNSTYPE" & Chr(9) & "DATE" & Chr(9) & "ACCNT" & Chr(9) & "NAME" & Chr(9) & "CLASS" & Chr(9) & "AMOUNT" & Chr(9) & "DOCNUM" & Chr(9) & "MEMO"
+    stream.WriteLine "!ENDTRNS"
+
+    ' for each record, get field values for all query fields
+    lrowCount = 0
+    strInfo = ""
+    Do While Not adors.EOF
+    
+        For Each adofld In adors.Fields
+            strInfo = strInfo & adors.Fields(adofld.Name) & Chr(9)
+        Next
+
+        strInfo = strInfo & vbCrLf ' new line after reading info in each field
+        
+        lrowCount = lrowCount + 1
+            
+        If lrowCount >= lbatchSize Then
+            stream.Write strInfo ' write batch to text file
+            strInfo = ""
+            lrowCount = 0
+        End If
+        
+        adors.MoveNext
+    Loop
+    
+    If Len(strInfo) > 0 Then stream.Write strInfo
+    stream.Close
+              
+    ' create file name ending in .iif for QuickBooks
+    strQBFileName = Left(strFileName, Len(strFileName) - 3) & "iif"
+    
+    ' if .iif file exists, delete first
+    If fso.FileExists(strFilePath & strQBFileName) Then fso.DeleteFile strFilePath & strQBFileName
+    
+    ' rename to the .txt file
+    Name strFilePath & strFileName As strFilePath & strQBFileName
+    
+    MsgBox "File successfully written!  File is on desktop as " & strQBFileName, vbOKOnly + vbInformation, "Success!"
+    
+ExitProcessing:
+Finally:
+    Call CloseMsgFrm
+    If Not stream Is Nothing Then
+        On Error Resume Next
+        stream.Close
+        On Error GoTo Except
+        Set stream = Nothing
+    End If
+    If Not adors Is Nothing Then Call CloseADORS(adors)
+    Exit Sub
+
+Except:
+    Call SystemFunctionRpt(Err.Number, Erl, Err.Description, Err.Source, "CreateQBFile", , ModName)
+    Resume Finally
+End Sub
