@@ -1,3 +1,30 @@
+' ==========================================================
+' QB ETL Helper Functions
+'
+' Supporting utilities for the QuickBooks → SQL Server
+' ETL pipeline.
+'
+' This module provides:
+'   - Type translation helpers between DAO and ADO
+'   - SQL formatting utilities
+'   - QuickBooks connectivity preflight checks
+'   - Field filtering logic for schema-driven inserts
+'
+' Public Functions:
+'   GetADOTypeFromDAO()    ' Maps DAO field types to ADO types
+'   UsesADOSize()          ' Determines whether ADO type requires size
+'   SQLDate()              ' Formats dates safely for SQL Server
+'   IsInsertableField()    ' Filters computed / non-insertable columns
+'   QBPreflight()          ' Validates QuickBooks connectivity before ETL
+'
+' External Dependencies:
+'   QBConnection()         ' Returns ODBC connection string for QuickBooks
+'
+' Requires References:
+'   Microsoft ActiveX Data Objects x.x Library
+'   Microsoft DAO x.x Object Library
+'
+' ==========================================================
 Function GetADOTypeFromDAO(ByVal lDAOType As Long) As Long
     
     Dim lType As Long
