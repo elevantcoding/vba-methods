@@ -1,3 +1,20 @@
+' ============================================================
+' QuickBooks → SQL Server ETL Pipeline
+'
+' Requires:
+'   - Reference: Microsoft ActiveX Data Objects x.x Library
+'   - Reference: Microsoft DAO x.x Object Library
+'
+' External Dependencies:
+'   ADOConnect   As String   ' SQL Server connection string
+'
+' Purpose:
+'   High-performance ETL pipeline that transfers data from
+'   ODBC-linked QuickBooks queries into SQL Server tables
+'   using schema-driven SQL and parameterized ADO commands.
+'
+' ============================================================
+
 Sub UpdateQB(ByVal dFrom As Date)
     On Error GoTo Except
     
