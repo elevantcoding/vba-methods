@@ -98,6 +98,7 @@ Except:
     Call SystemFunctionRpt(Err.Number, Erl, Err.Description, Err.Source, "UpdateQB", , ModName)
     Resume Finally
 End Sub
+
 Function UpdateQBTable(cSQL As ADODB.Connection, ByVal strSourceQuery As String, ByVal strDestinationTable As String, ByVal dFrom As Date, ByVal strType As String) As Boolean
     On Error GoTo Except
 
@@ -149,12 +150,6 @@ Finally:
 Except:
     Call SystemFunctionRpt(Err.Number, Erl, Err.Description, Err.Source, "UpdateQBTable", , ModName)
     Resume Finally
-
-End Function
-Private Function IsInsertableField(fld As ADODB.Field) As Boolean
-
-    ' 16 is primary key attribute, JobCostMonth, computed column
-    IsInsertableField = (fld.Attributes <> 16 And fld.Name <> "JobCostMonth")
 
 End Function
 
