@@ -22,7 +22,7 @@
 ' This removes the need for [Forms]![...] query dependencies.
 ' =========================================================
 
-Sub UpdateQB(ByVal dFrom As Date)
+Public Sub UpdateQB(ByVal dFrom As Date)
     On Error GoTo Except
     
     Dim lCountConfirm As Long
@@ -123,7 +123,7 @@ Except:
     Resume Finally
 End Sub
 
-Function UpdateQBTable(cSQL As ADODB.Connection, ByVal strSourceQuery As String, ByVal strDestinationTable As String, ByVal dFrom As Date, ByVal strType As String) As Boolean
+Private Function UpdateQBTable(cSQL As ADODB.Connection, ByVal strSourceQuery As String, ByVal strDestinationTable As String, ByVal dFrom As Date, ByVal strType As String) As Boolean
     On Error GoTo Except
 
     Dim strFunction As String
@@ -177,7 +177,7 @@ Except:
 
 End Function
 
-Function WriteToSQLTables(cSQL As ADODB.Connection, ByVal strDestinationTable As String, ByVal strQuery As String, Optional ByVal dFrom As Date = 0) As Boolean
+Private Function WriteToSQLTables(cSQL As ADODB.Connection, ByVal strDestinationTable As String, ByVal strQuery As String, Optional ByVal dFrom As Date = 0) As Boolean
     On Error GoTo Except
     
     ' write from odbc-linked QuickBooks tables directly to SQL, avoiding linked SQL table write time
