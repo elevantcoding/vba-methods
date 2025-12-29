@@ -129,3 +129,14 @@ Private Function IsInsertableField(fld As ADODB.Field) As Boolean
 
 End Function
 
+Function IsDAORecordsetOpen(rs As DAO.Recordset) As Boolean
+    
+    ' used to detect whether a DAO recordset is still open
+    On Error Resume Next
+    Dim t As Long
+    t = rs.Type
+    IsDAORecordsetOpen = (Err.Number = 0)
+    Err.Clear
+    
+End Function
+
