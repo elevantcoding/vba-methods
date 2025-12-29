@@ -1,0 +1,398 @@
+Sub UpdateQB(ByVal dFrom As Date)
+    On Error GoTo Except
+    
+    Dim lCountConfirm As Long
+    Dim inTransaction As Boolean
+    Dim cSQL As ADODB.Connection
+    
+    'make sure connectivity exists
+    If Not QBPreflight("UpdateQB") Then
+        MsgBox "Not connected to QuickBooks. Please login to QuickBooks for the system to run the update.", vbInformation, "QuickBooks"
+        Exit Sub
+    End If
+    
+    Call Dlg(" ", "Reviewing", "Just a Moment", "")
+    DoCmd.RepaintObject acForm, DlgFrm
+    DoEvents
+    
+    'make sure contract numbers in quickbooks inv and cm are in tblContracts in GBLDB
+    If Not ConfirmMatchingContracts(dFrom) Then GoTo ExitProcessing
+            
+    If Not ReviewCC(dFrom) Then GoTo ExitProcessing
+    
+    Call Dlg(" ", "Updating", "Just a Moment", "")
+    DoCmd.RepaintObject acForm, DlgFrm
+    DoEvents
+    
+    Set cSQL = New ADODB.Connection
+    cSQL.open ADOConnect
+    cSQL.BeginTrans 'batch operations within same transaction in case of error to rollback entire procedure
+    inTransaction = True
+    
+    'if count of records in QBAccts, then update with QBAccts
+    If GetQBRecordCount(QBAccts) > 0 Then
+        Call Dlg("UPDATING", "Accounts", "Just a Moment", "")
+        DoCmd.RepaintObject acForm, DlgFrm
+        DoEvents
+        If Not WriteToSQLTables(cSQL, "tblQuickBooksAccounts", QBAccts) Then
+            MsgBox "QuickBooks Accounts table was called to update but did not succeed.", vbInformation, "UpdateQB"
+            GoTo ExitProcessing
+        End If
+    End If
+    
+    'if count of records in QBItem, then update with QBItem
+    If GetQBRecordCount(QBItem) > 0 Then
+        Call Dlg("UPDATING", "Items", "Just a Moment", "")
+        DoCmd.RepaintObject acForm, DlgFrm
+        DoEvents
+        If Not WriteToSQLTables(cSQL, "tblQuickBooksItem", QBItem) Then
+            MsgBox "QuickBooks Item table was called to update but did not succeed.", vbInformation, "UpdateQB"
+            GoTo ExitProcessing
+        End If
+    End If
+    
+    Call Dlg("UPDATING", "", "Just a Moment", "")
+    DoCmd.RepaintObject acForm, DlgFrm
+    DoEvents
+    
+    expectedCount = 0
+    
+    If Not UpdateQBTable(cSQL, "QBCC", "tblQuickBooksCreditCards", dFrom, "Credit Card Transactions") Then GoTo ExitProcessing
+    
+    If Not UpdateQBTable(cSQL, "QBInvoice", "tblQuickBooksRevenue", dFrom, "Revenue Transactions - Invoices") Then GoTo ExitProcessing
+    
+    If Not UpdateQBTable(cSQL, "QBCM", "tblQuickBooksRevenue", dFrom, "Revenue Transactions - Credits") Then GoTo ExitProcessing
+    
+    If Not UpdateQBTable(cSQL, "QBRecp", "tblQuickBooksReceipts", dFrom, "Revenue Transactions - Receipts") Then GoTo ExitProcessing
+    
+    If Not UpdateQBTable(cSQL, "QBPer", "tblQuickBooksPermits", dFrom, "Permits") Then GoTo ExitProcessing
+    
+    cSQL.CommitTrans
+    inTransaction = False
+    
+    ' after commit, count transactions added to tables and compare with cumulative obtained in expectedCount
+    lCountConfirm = CLng(Nz(DCount("*", "tblQuickBooksCreditCards", "ModDate>=#" & dFrom & "#"), 0))
+    lCountConfirm = lCountConfirm + CLng(Nz(DCount("*", "tblQuickBooksRevenue", "ModDate>=#" & dFrom & "#"), 0))
+    lCountConfirm = lCountConfirm + CLng(Nz(DCount("*", "tblQuickBooksReceipts", "ModDate>=#" & dFrom & "#"), 0))
+    lCountConfirm = lCountConfirm + CLng(Nz(DCount("*", "tblQuickBooksPermits", "ModDate>=#" & dFrom & "#"), 0))
+    
+    If lCountConfirm <> expectedCount Then
+        MsgBox expectedCount & " total records to be added does not match " & lCountConfirm & " records added.  Transaction has been committed.", vbOKOnly + vbInformation, "UpdateQB"
+    Else
+        MsgBox "QuickBooks Information has been successfully written to SQL Server.", vbOKOnly + vbInformation, "UpdateQB"
+    End If
+        
+ExitProcessing:
+Finally:
+    If inTransaction Then cSQL.RollbackTrans
+    Call CloseDlgFrm
+    If Not cSQL Is Nothing Then
+        If cSQL.State = 1 Then
+            cSQL.Close
+        End If
+        Set cSQL = Nothing
+    End If
+    Exit Sub
+
+Except:
+    Call SystemFunctionRpt(Err.Number, Erl, Err.Description, Err.Source, "UpdateQB", , ModName)
+    Resume Finally
+End Sub
+Function UpdateQBTable(cSQL As ADODB.Connection, ByVal strSourceQuery As String, ByVal strDestinationTable As String, ByVal dFrom As Date, ByVal strType As String) As Boolean
+    On Error GoTo Except
+
+    Dim strFunction As String
+    Dim strSQL As String
+    
+    Dim lCount As Long
+    
+    UpdateQBTable = False
+    
+    'join named query to from date to form function structure
+    strFunction = strSourceQuery & "(#" & dFrom & "#)"
+    
+    'use Eval to parse as a function
+    lCount = GetQBRecordCount(Eval(strFunction))
+    
+    If lCount > 0 Then
+        expectedCount = expectedCount + lCount
+    
+        'display progress
+        Call Dlg("UPDATING", "From QB to SQL Server", strType, "")
+        DoCmd.RepaintObject acForm, DlgFrm
+        DoEvents
+  
+        'conditional sql
+        Select Case strSourceQuery
+            Case "QBCM"
+                strSQL = "DELETE FROM " & strDestinationTable & " WHERE ModDate>='" & SQLDate(dFrom) & "' AND InvoiceType = 'Credit Memo'"
+            Case "QBInvoice"
+                strSQL = "DELETE FROM " & strDestinationTable & " WHERE ModDate>='" & SQLDate(dFrom) & "' AND InvoiceType = 'Invoice'"
+            Case Else
+                strSQL = "DELETE FROM " & strDestinationTable & " WHERE ModDate>='" & SQLDate(dFrom) & "'"
+
+        End Select
+  
+        cSQL.Execute strSQL
+  
+        If Not WriteToSQLTables(cSQL, strDestinationTable, strSourceQuery, dFrom) Then GoTo ExitProcessing
+    End If
+    
+    'once function is true, UpdateQB will continue, else it will be rolledback in UpdateQB
+    UpdateQBTable = True
+
+ExitProcessing:
+Finally:
+    Call CloseDlgFrm
+    Exit Function
+
+Except:
+    Call SystemFunctionRpt(Err.Number, Erl, Err.Description, Err.Source, "UpdateQBTable", , ModName)
+    Resume Finally
+
+End Function
+Private Function IsInsertableField(fld As ADODB.Field) As Boolean
+
+    ' 16 is primary key attribute, JobCostMonth, computed column
+    IsInsertableField = (fld.Attributes <> 16 And fld.Name <> "JobCostMonth")
+
+End Function
+
+Function WriteToSQLTables(cSQL As ADODB.Connection, ByVal strDestinationTable As String, ByVal strQuery As String, Optional ByVal dFrom As Date = 0) As Boolean
+    On Error GoTo Except
+    
+    ' write from odbc-linked QuickBooks tables directly to SQL, avoiding linked SQL table write time
+    Dim db As DAO.Database
+    Dim recordsQB As DAO.Recordset ' record set for ODBC-linked table queries
+    Dim fldQB As DAO.Field
+    
+    Dim cSQLCmd As ADODB.Command
+    
+    Dim adorsSQL As ADODB.Recordset ' record set for SQL Server tables
+    Dim adorsFld As ADODB.Field
+    Dim prm As ADODB.Parameter
+    
+    Dim lParamType As Long
+    Dim lParamSize As Long
+    Dim lParamDirection As Long
+    
+    Dim strSQL As String
+    Dim strColumns As String
+    Dim strFunction As String
+    Dim fldName As String
+    
+    WriteToSQLTables = False
+    
+    ' dedicated sql connection
+    Set adorsSQL = New ADODB.Recordset
+    Set cSQLCmd = New ADODB.Command
+    
+    cSQLCmd.ActiveConnection = cSQL
+    cSQLCmd.CommandType = adCmdText
+    
+    ' define function using strQuery and dFrom date to pass to the function
+    ' use eval to parse strFunction as a function
+    Set db = CurrentDb
+    If dFrom = 0 Then
+        strFunction = strQuery
+        Set recordsQB = db.OpenRecordset(strFunction, 2, 512)
+    Else
+        strFunction = strQuery & "(#" & dFrom & "#)"
+        Set recordsQB = db.OpenRecordset(Eval(strFunction), 2, 512)
+    End If
+    
+    ' open SQL table to get column info
+    adorsSQL.open "SELECT * FROM " & strDestinationTable & " WHERE 1=0", cSQL, adOpenStatic, adLockReadOnly
+    
+    ' build parameter info
+    lParamDirection = 1 ' adParamInput
+    
+    ' build insert statement
+    strSQL = "INSERT INTO " & strDestinationTable & " ("
+    strColumns = "VALUES ("
+    
+    For Each adorsFld In adorsSQL.Fields
+        If strDestinationTable <> "tblQuickBooksItem" Then
+            If IsInsertableField(adorsFld) Then
+                strSQL = strSQL & "[" & adorsFld.Name & "], "
+                strColumns = strColumns & "?, "
+            End If
+        Else
+            strSQL = strSQL & "[" & adorsFld.Name & "], "
+            strColumns = strColumns & "?, "
+        End If
+    Next
+    
+    ' create qualified insert statement with values
+    strSQL = Left(strSQL, Len(strSQL) - 2) & ") "
+    strColumns = Left(strColumns, Len(strColumns) - 2) & ")"
+    
+    ' set forth the command text as qualified insert statement
+    cSQLCmd.CommandText = strSQL & strColumns
+    
+    ' loop through all query fields to translate into ADO parameter column types
+    ' create and append parameters
+    For Each adorsFld In adorsSQL.Fields
+        If IsInsertableField(adorsFld) Then
+            Set fldQB = recordsQB.Fields(adorsFld.Name)
+                
+            lParamSize = adorsFld.DefinedSize
+            lParamType = GetADOTypeFromDAO(fldQB.Type)
+                
+            If UsesADOSize(lParamType) Then
+                cSQLCmd.Parameters.Append cSQLCmd.CreateParameter(adorsFld.Name, lParamType, lParamDirection, lParamSize)
+            ElseIf adorsFld.Type = adNumeric Then ' if is decimal (numeric as per ADO), define precision and scale
+                lParamType = adorsFld.Type
+                Set prm = cSQLCmd.CreateParameter(adorsFld.Name, lParamType, lParamDirection)
+                prm.Precision = 18
+                prm.NumericScale = 2
+                cSQLCmd.Parameters.Append prm
+            Else
+                cSQLCmd.Parameters.Append cSQLCmd.CreateParameter(adorsFld.Name, lParamType, lParamDirection)
+            End If
+        End If
+    Next
+    
+    ' for each field in the DAO recordset, set the cSQLParameter value
+    Do While Not recordsQB.EOF
+        For Each adorsFld In adorsSQL.Fields
+            If IsInsertableField(adorsFld) Then
+                fldName = adorsFld.Name
+                cSQLCmd.Parameters(fldName).Value = recordsQB.Fields(fldName).Value
+            End If
+        Next
+        cSQLCmd.Execute
+        recordsQB.MoveNext
+    Loop
+    WriteToSQLTables = True
+    
+Finally:
+    If Not adorsSQL Is Nothing Then Call CloseADORS(adorsSQL)
+    
+    If Not recordsQB Is Nothing Then
+        If IsDAORecordsetOpen(recordsQB) Then recordsQB.Close
+        Set recordsQB = Nothing
+    End If
+    
+    If Not cSQLCmd Is Nothing Then
+        Set cSQLCmd = Nothing
+    End If
+    Exit Function
+    
+Except:
+    Select Case Err.Number
+        Case -2147217887
+            MsgBox "Could not parse information from " & strQuery & " to write to destination table " & strDestinationTable & " due to invalid precision / scale of decimal for a column in the table.", vbOKOnly + vbInformation, "WriteToSQLTables"
+        Case Else
+            Call SystemFunctionRpt(Err.Number, Erl, Err.Description, Err.Source, "WriteToSQLTables", , ModName)
+    End Select
+    Resume Finally
+
+End Function
+Function QBPreflight(ByVal strOrigin As String, Optional ByVal timeout As Long = 10) As Boolean
+    On Error GoTo Except
+
+    ' prior to attempting build of QB links, determine if QB connectivity
+    ' check file availability by attempting to open the connection
+    ' and query a known table
+    Dim cn As ADODB.Connection: Set cn = New ADODB.Connection
+    Dim adors As ADODB.Recordset: Set adors = New ADODB.Recordset
+    Const ProcName As String = "QBPreflight"
+    
+    cn.ConnectionTimeout = timeout
+    cn.open QBConnection
+    cn.Execute "SELECT 1 FROM QBReportAdminGroup_v_AccountType"
+    QBPreflight = True
+
+Finally:
+    Call CloseADORS(adors)
+    If Not cn Is Nothing Then
+        If cn.State = 1 Then cn.Close
+        Set cn = Nothing
+    End If
+    Exit Function
+
+Except:
+    Call SystemFunctionRpt(Err.Number, Erl, Err.Description, Err.Source, ProcName, , ModName, , strOrigin, False, , False)
+    Resume Finally
+End Function
+Function SQLDate(ByVal d As Date) As String
+          
+    SQLDate = Format(d, "yyyy-mm-dd")
+
+End Function
+Function UsesADOSize(ByVal lADOType As Long) As Boolean
+    On Error GoTo ErrorHandler
+
+    UsesADOSize = False
+    
+    Select Case lADOType
+        Case 200, 201, 202
+            UsesADOSize = True
+            Exit Function
+    End Select
+
+ExitHandler:
+    Exit Function
+
+ErrorHandler:
+    Call SystemFunctionRpt(Err.Number, Erl, Err.Description, Err.Source, "UsesADOSize", , ModName)
+    Resume ExitHandler
+
+End Function
+Function GetADOTypeFromDAO(ByVal lDAOType As Long) As Long
+    On Error GoTo ErrorHandler
+
+    'get ado field type value for dao field type value (numeric)
+    Select Case lDAOType
+        Case 1 'boolean
+            GetADOTypeFromDAO = 11 'adBoolean
+        Case 2 'byte
+            GetADOTypeFromDAO = 128 'adBinary
+        Case 3, 4 'integer, long integer
+            GetADOTypeFromDAO = 3 'adInteger
+        Case 5 'currency
+            GetADOTypeFromDAO = 6 'adCurrency
+        Case 6 'single
+            GetADOTypeFromDAO = 4 'adSingle
+        Case 7 'double
+            GetADOTypeFromDAO = 5 'adDouble
+        Case 8 'Date/Time
+            GetADOTypeFromDAO = 133 'adDBDate
+        Case 9, 17 'binary, varbinary
+            GetADOTypeFromDAO = 204 'adVarBinary
+        Case 10 'text
+            GetADOTypeFromDAO = 200 'adVarChar
+        Case 11 'long binary ole
+            GetADOTypeFromDAO = 205 'adLongVarBinary
+        Case 12 'memo
+            GetADOTypeFromDAO = 201 'adLongVarChar, use -1 for length
+        Case 15 'guid
+            GetADOTypeFromDAO = 72 'adGUID
+        Case 16 'big integer
+            GetADOTypeFromDAO = 20 'adBigInt
+        Case 18 'character
+            GetADOTypeFromDAO = 129 'adChar
+        Case 19 'numeric
+            GetADOTypeFromDAO = 131 'adNumeric
+        Case 20 'decimal
+            GetADOTypeFromDAO = 14 'adDecimal
+        Case 21 'float
+            GetADOTypeFromDAO = 5 'adDouble
+        Case 22 'time
+            GetADOTypeFromDAO = 134 'adDBTime
+        Case 23 'timestamp
+            GetADOTypeFromDAO = 135 'adDBTimeStamp
+        Case Else
+            GetADOTypeFromDAO = 0
+    End Select
+    
+ExitHandler:
+    Exit Function
+
+ErrorHandler:
+    Call SystemFunctionRpt(Err.Number, Erl, Err.Description, Err.Source, "GetADOTypeFromDAO", , ModName)
+    Resume ExitHandler
+    
+End Function
+
