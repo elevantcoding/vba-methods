@@ -17,6 +17,7 @@ Location: `/qb-etl`
 
 ###  SQL Server →  QuickBooks ETL
 CreateQBFile
+- VBA that generates QuickBooks-importable .IIF files from SQL data for batch transaction import
 
 Location: `/qb-etl`
 
