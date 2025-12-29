@@ -27,6 +27,18 @@ interoperability.
 
 Location: `/security`
 
+### Windows API Utilities
+
+Location: /winapi
+
+Low-level Windows helpers implemented in VBA using Win32 API calls.
+
+Includes:
+
+Idle Time Detection
+Retrieves machine-level idle time (seconds since last user input) using the Windows API.
+Useful for session management, inactivity monitoring, and graceful application shutdown in long-running VBA applications.
+
 ## Design Principles
 - Transaction safety
 - Schema-driven logic
@@ -36,3 +48,4 @@ Location: `/security`
 
 This repository demonstrates how VBA can be used to build reliable,
 enterprise-grade systems — not just macros.
+
