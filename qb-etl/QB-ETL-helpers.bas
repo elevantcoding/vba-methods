@@ -26,7 +26,7 @@
 '   Microsoft DAO x.x Object Library
 '
 ' ==========================================================
-Function GetADOTypeFromDAO(ByVal lDAOType As Long) As Long
+Public Function GetADOTypeFromDAO(ByVal lDAOType As Long) As Long
     
     Dim lType As Long
 
@@ -76,7 +76,7 @@ Function GetADOTypeFromDAO(ByVal lDAOType As Long) As Long
     
 End Function
 
-Function UsesADOSize(ByVal lADOType As Long) As Boolean
+Public Function UsesADOSize(ByVal lADOType As Long) As Boolean
     
 UsesADOSize = False
     
@@ -88,13 +88,13 @@ UsesADOSize = False
 
 End Function
 
-Function SQLDate(ByVal d As Date) As String
+Public Function SQLDate(ByVal d As Date) As String
           
     SQLDate = Format(d, "yyyy-mm-dd")
 
 End Function
 
-Function QBPreflight(ByVal strOrigin As String, Optional ByVal timeout As Long = 10) As Boolean
+Public Function QBPreflight(ByVal strOrigin As String, Optional ByVal timeout As Long = 10) As Boolean
     On Error GoTo Except
 
     ' prior to attempting build of QB links, determine if QB connectivity
@@ -129,7 +129,7 @@ Private Function IsInsertableField(fld As ADODB.Field) As Boolean
 
 End Function
 
-Function IsDAORecordsetOpen(rs As DAO.Recordset) As Boolean
+Public Function IsDAORecordsetOpen(rs As DAO.Recordset) As Boolean
     
     ' used to detect whether a DAO recordset is still open
     On Error Resume Next
