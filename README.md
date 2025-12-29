@@ -15,6 +15,11 @@ High-performance ETL pipeline that:
 
 Location: `/qb-etl`
 
+###  SQL Server →  QuickBooks ETL
+CreateQBFile
+
+Location: `/qb-etl`
+
 ### Security & Encryption
 Reversible string obfuscation and encryption system with cross-language
 interoperability.
