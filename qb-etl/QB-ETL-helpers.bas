@@ -122,7 +122,7 @@ Except:
     Resume Finally
 End Function
 
-Private Function IsInsertableField(fld As ADODB.Field) As Boolean
+Public Function IsInsertableField(fld As ADODB.Field) As Boolean
 
     ' 16 is primary key attribute, JobCostMonth, computed column
     IsInsertableField = (fld.Attributes <> 16 And fld.Name <> "JobCostMonth")
