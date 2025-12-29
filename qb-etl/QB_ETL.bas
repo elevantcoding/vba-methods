@@ -18,7 +18,7 @@
 '   This ETL pipeline does not rely on saved Access queries.
 
 ' All source datasets are implemented as VBA functions that return SQL statements.  
-' At runtime, the ETL engine resolves and executes the appropriate dataset function using `Eval()`.
+' For date-based SQL, at runtime, the ETL engine resolves and executes the appropriate dataset function using `Eval()`.
 ' This removes the need for [Forms]![...] query dependencies.
 ' =========================================================
 
