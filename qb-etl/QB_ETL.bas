@@ -28,8 +28,8 @@ Sub UpdateQB(ByVal dFrom As Date)
         Exit Sub
     End If
     
-    Call Dlg(" ", "Reviewing", "Just a Moment", "")
-    DoCmd.RepaintObject acForm, DlgFrm
+    Call DisplayMsg(, "Reviewing", "Just a Moment")
+    DoCmd.RepaintObject acForm, MsgFrm
     DoEvents
     
     'make sure contract numbers in quickbooks inv and cm are in tblContracts in GBLDB
@@ -37,8 +37,8 @@ Sub UpdateQB(ByVal dFrom As Date)
             
     If Not ReviewCC(dFrom) Then GoTo ExitProcessing
     
-    Call Dlg(" ", "Updating", "Just a Moment", "")
-    DoCmd.RepaintObject acForm, DlgFrm
+    Call DisplayMsg(, "Updating", "Just a Moment")
+    DoCmd.RepaintObject acForm, MsgFrm
     DoEvents
     
     Set cSQL = New ADODB.Connection
@@ -48,8 +48,8 @@ Sub UpdateQB(ByVal dFrom As Date)
     
     'if count of records in QBAccts, then update with QBAccts
     If GetQBRecordCount(QBAccts) > 0 Then
-        Call Dlg("UPDATING", "Accounts", "Just a Moment", "")
-        DoCmd.RepaintObject acForm, DlgFrm
+        Call DisplayMsg("UPDATING", "Accounts", "Just a Moment")
+        DoCmd.RepaintObject acForm, MsgFrm
         DoEvents
         If Not WriteToSQLTables(cSQL, "tblQuickBooksAccounts", QBAccts) Then
             MsgBox "QuickBooks Accounts table was called to update but did not succeed.", vbInformation, "UpdateQB"
@@ -59,8 +59,8 @@ Sub UpdateQB(ByVal dFrom As Date)
     
     'if count of records in QBItem, then update with QBItem
     If GetQBRecordCount(QBItem) > 0 Then
-        Call Dlg("UPDATING", "Items", "Just a Moment", "")
-        DoCmd.RepaintObject acForm, DlgFrm
+        Call DisplayMsg("UPDATING", "Items", "Just a Moment")
+        DoCmd.RepaintObject acForm, MsgFrm
         DoEvents
         If Not WriteToSQLTables(cSQL, "tblQuickBooksItem", QBItem) Then
             MsgBox "QuickBooks Item table was called to update but did not succeed.", vbInformation, "UpdateQB"
@@ -68,8 +68,8 @@ Sub UpdateQB(ByVal dFrom As Date)
         End If
     End If
     
-    Call Dlg("UPDATING", "", "Just a Moment", "")
-    DoCmd.RepaintObject acForm, DlgFrm
+    Call DisplayMsg("UPDATING", , "Just a Moment")
+    DoCmd.RepaintObject acForm, MsgFrm
     DoEvents
     
     expectedCount = 0
@@ -102,7 +102,7 @@ Sub UpdateQB(ByVal dFrom As Date)
 ExitProcessing:
 Finally:
     If inTransaction Then cSQL.RollbackTrans
-    Call CloseDlgFrm
+    Call CloseMsgFrm
     If Not cSQL Is Nothing Then
         If cSQL.State = 1 Then
             cSQL.Close
@@ -136,8 +136,8 @@ Function UpdateQBTable(cSQL As ADODB.Connection, ByVal strSourceQuery As String,
         expectedCount = expectedCount + lCount
     
         'display progress
-        Call Dlg("UPDATING", "From QB to SQL Server", strType, "")
-        DoCmd.RepaintObject acForm, DlgFrm
+        Call DisplayMsg("UPDATING", "From QB to SQL Server", strType)
+        DoCmd.RepaintObject acForm, MsgFrm
         DoEvents
   
         'conditional sql
@@ -161,7 +161,7 @@ Function UpdateQBTable(cSQL As ADODB.Connection, ByVal strSourceQuery As String,
 
 ExitProcessing:
 Finally:
-    Call CloseDlgFrm
+    Call CloseMsgFrm
     Exit Function
 
 Except:
