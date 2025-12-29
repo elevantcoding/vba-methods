@@ -15,6 +15,18 @@
 '   High-performance ETL pipeline that transfers data from
 '   ODBC-linked QuickBooks queries into SQL Server tables
 '   using schema-driven SQL and parameterized ADO commands.
+'   This ETL pipeline does not rely on saved Access queries.
+
+' All source datasets are implemented as VBA functions that return SQL statements.  
+' At runtime, the ETL engine resolves and executes the appropriate dataset function using `Eval()`.
+
+' This design provides:
+
+' - Full protection in `.accde`
+' - No dependency on visible QueryDefs
+' - Easier version control and refactoring
+' - Strong separation between ETL orchestration and dataset logic
+' - Reduced risk of user tampering or broken object dependencies
 ' =========================================================
 
 Sub UpdateQB(ByVal dFrom As Date)
