@@ -19,7 +19,8 @@
 '
 ' External Dependencies:
 '   QBConnection()         ' Returns ODBC connection string for QuickBooks
-'
+'   Example: FILEDSN=\\QuickBooksServer\quickbooksfilename.qbw.dsn;UID=youruser;PWD=yourpassword
+
 ' Requires References:
 '   Microsoft ActiveX Data Objects x.x Library
 '   Microsoft DAO x.x Object Library
