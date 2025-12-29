@@ -93,3 +93,11 @@ Except:
     Call SystemFunctionRpt(Err.Number, Erl, Err.Description, Err.Source, ProcName, , ModName, , strOrigin, False, , False)
     Resume Finally
 End Function
+
+Private Function IsInsertableField(fld As ADODB.Field) As Boolean
+
+    ' 16 is primary key attribute, JobCostMonth, computed column
+    IsInsertableField = (fld.Attributes <> 16 And fld.Name <> "JobCostMonth")
+
+End Function
+
