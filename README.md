@@ -22,7 +22,7 @@ CreateQBFile
 Location: `/qb-etl`
 
 ### Security & Encryption
-Reversible string obfuscation and encryption system with cross-language
+Reversible string obfuscation system with cross-language
 interoperability.
 
 Location: `/security`
