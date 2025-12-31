@@ -321,9 +321,9 @@ Function DecipherString(ByVal myCipherstring As String) As String
     ' 000000|0|0|000|aaaaaaaaaa
     ' -----------------------------------------------------------
     ' altervals: 6-char numeric string (most recent iteration of original random vals used via altervals)
-    ' randval: 1-char numeric string (randval)
+    ' randval: 1-char numeric string
     ' v: 1-char numeric string (last used index of altervals)
-    ' original string length: 3-char numeric string, padded with zero if < 100
+    ' original string length: 3-char numeric string, formatted with leading zero if < 100
     ' numciph: 10 chars for the numeric cipher (GenerateCiph used in NumCipher)
     ' prefix length =  21 characters (no vertical bars)
     
@@ -486,6 +486,7 @@ Function ValidateXorRange() As Long
     Next
     ValidateXorRange = C
 End Sub
+
 
 
 
