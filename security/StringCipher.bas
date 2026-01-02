@@ -362,52 +362,35 @@ Function DecipherString(ByVal myCipherstring As String) As String
     ' decipher using numcipher
     prefix = NumCipher(prefix, False, numciph)
     
+        If Len(prefix) <> 11 Or Not prefix Like String(11, "#") Then
+        MsgBox "Invalid cipher prefix.", vbInformation, "DecipherString"
+        Exit Function
+    End If
+    
     ' work from the right:
     ' get 3-digits for string length
     chars = Right(prefix, 3)
-    If Not chars Like "###" Then
-        MsgBox "Value of string length not found in prefix.", vbInformation, "DecipherString"
-        Exit Function
-    ElseIf CLng(chars) = 0 Then
-        MsgBox "Value of string length is zero.", vbInformation, "DecipherString"
-        Exit Function
-    Else
-        strLen = CLng(chars)
-    End If
+    strLen = CLng(chars)
     
     ' trim string length from prefix
     prefix = Left(prefix, Len(prefix) - 3)
     
     ' get v
     char = Right(prefix, 1)
-    If Not (char Like "#") Then
-        MsgBox "Value of v not found in prefix.", vbInformation, "DecipherString"
-        Exit Function
-    Else
-        v = CLng(char)
-    End If
+    v = CLng(char)
     
     ' trim v from prefix
     prefix = Left(prefix, Len(prefix) - 1)
-        
+    
     ' get randval from prefix
     char = Right(prefix, 1)
-    If Not (char Like "#") Then
-        MsgBox "Random value not found in prefix.", vbInformation, "DecipherString"
-        Exit Function
-    Else
-        randval = CLng(char)
-    End If
+    randval = CLng(char)
     
     ' trim randval from prefix
     prefix = Left(prefix, Len(prefix) - 1)
     
-    ' get altervals from prefix, decipher using NumCipher, assign to altervals
+    ' get altervals from prefix
     altervals = prefix
-    If Len(altervals) <> 6 Then
-        MsgBox "Random values for string alteration not found in prefix.", vbInformation, "DecipherString"
-        Exit Function
-    End If
 
     ' remove prefix from string from stringtoDecipher, leaving actual ciphered string chars
     paddedString = Right(stringtoDecipher, Len(stringtoDecipher) - prefixlen)
@@ -486,6 +469,7 @@ Function ValidateXorRange() As Long
     Next
     ValidateXorRange = C
 End Sub
+
 
 
 
