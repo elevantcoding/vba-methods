@@ -34,6 +34,13 @@ Function ValidHexValues(ByVal myhexstring As String) As Boolean
     ValidHexValues = True
     
 End Function
+
+Function IsBetween(ByVal evalNum As Variant, ByVal valOne As Variant, ByVal valTwo As Variant) As Boolean
+
+    IsBetween = (evalNum >= valOne AND evalNum <= valTwo)
+
+End Function
+
 Function GetRandChar(Optional ByVal l As Long, Optional ByVal u As Long) As String
     
     ' used for ascii values between 32 and 255, no negative values
@@ -44,13 +51,13 @@ Function GetRandChar(Optional ByVal l As Long, Optional ByVal u As Long) As Stri
     l = Abs(l): u = Abs(u)
     
     If l > u Then
-        val = l
-        l = u
-        u = val
+        val = u
+        u = l
+        l = val
     End If
     
-    If l > 0 And l > lower Then lower = l
-    If u > 0 And u < upper Then upper = u
+    If IsBetween(l, lower, upper) Then lower = l
+    If IsBetween(u, lower, upper) Then upper = u
     
     Do
         val = Int((upper - lower + 1) * Rnd + lower)
@@ -59,6 +66,7 @@ Function GetRandChar(Optional ByVal l As Long, Optional ByVal u As Long) As Stri
     GetRandChar = Chr(val)
 
 End Function
+
 Function GetRandVal(ByVal lower As Long, ByVal upper As Long) As Long
     
     ' return a random integer between lower and upper (inclusive), no negative values
@@ -469,6 +477,7 @@ Function ValidateXorRange() As Long
     Next
     ValidateXorRange = C
 End Sub
+
 
 
 
