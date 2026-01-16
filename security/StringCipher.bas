@@ -476,7 +476,8 @@ Function ValidateXorRange() As Long
         Next
     Next
     ValidateXorRange = C
-End Sub
+End Function
+
 
 
 
