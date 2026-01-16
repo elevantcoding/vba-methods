@@ -37,6 +37,13 @@ End Function
 
 Function IsBetween(ByVal evalNum As Double, ByVal valOne As Double, ByVal valTwo As Double) As Boolean
 
+    Dim val As Double
+    If valOne > valTwo Then
+        val = valOne
+        valOne = valTwo
+        valTwo = val
+    End If
+
     IsBetween = (evalNum >= valOne AND evalNum <= valTwo)
 
 End Function
@@ -477,6 +484,7 @@ Function ValidateXorRange() As Long
     Next
     ValidateXorRange = C
 End Function
+
 
 
 
