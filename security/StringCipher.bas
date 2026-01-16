@@ -35,7 +35,7 @@ Function ValidHexValues(ByVal myhexstring As String) As Boolean
     
 End Function
 
-Function IsBetween(ByVal evalNum As Variant, ByVal valOne As Variant, ByVal valTwo As Variant) As Boolean
+Function IsBetween(ByVal evalNum As Double, ByVal valOne As Double, ByVal valTwo As Double) As Boolean
 
     IsBetween = (evalNum >= valOne AND evalNum <= valTwo)
 
@@ -477,6 +477,7 @@ Function ValidateXorRange() As Long
     Next
     ValidateXorRange = C
 End Function
+
 
 
 
