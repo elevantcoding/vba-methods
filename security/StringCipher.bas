@@ -218,8 +218,11 @@ Function CipherString(ByVal myTextstring As String) As String
     ' default value
     CipherString = ""
 
+    ' trim string
+    stringtoCipher = Trim(myTextstring)
+    
     ' nothing to cipher
-    If Len(myTextstring) = 0 Then Exit Function
+    If Len(stringtoCipher) = 0 Then Exit Function
     
     Randomize
     ' get a 6-digit random value, 0 to 999,999
@@ -484,6 +487,7 @@ Function ValidateXorRange() As Long
     Next
     ValidateXorRange = C
 End Function
+
 
 
 
