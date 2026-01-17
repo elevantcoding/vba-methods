@@ -74,7 +74,6 @@ Except:
 End Sub
 
 ' detect string similarity
-
 Function CompareStrings(ByVal strFirst As String, ByVal strSecond As String) As Variant
     On Error GoTo Except
 
