@@ -22,14 +22,14 @@ Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As Strin
     
     ' exit if named table does not exist
     If Not TableExists(tableName) Then
-        MsgBox "Table " & tableName & " does not exist.", vbInformation, "DAOTruncate"
+        MsgBox "Table " & tableName & " does not exist.", vbInformation, ProcName
         Exit Function
     End If
     
     'determine if table is related to another table
     Set tdf = db.TableDefs(tableName)
     If TableIsRelated(db, tdf) Then
-        MsgBox tableName & " has established relationships and cannot be truncated.", vbInformation, "DAOTruncate"
+        MsgBox tableName & " has established relationships and cannot be truncated.", vbInformation, ProcName
         Exit Function
     End If
     
@@ -40,18 +40,18 @@ Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As Strin
     
     ' if not set column, column does not exist
     If fld Is Nothing Then
-        MsgBox "Column " & columnName & " does not exist in " & tableName & ".", vbInformation, "DAOTruncate"
+        MsgBox "Column " & columnName & " does not exist in " & tableName & ".", vbInformation, ProcName
         Exit Function
     End If
     
     ' make sure column is autonumber
     If Not IsAutoNumber(fld) Then
-        MsgBox "Column " & columnName & " is not an auto-number.", vbInformation, "DAOTruncate"
+        MsgBox "Column " & columnName & " is not an auto-number.", vbInformation, ProcName
         Exit Function
     End If
     
     ' confirm proceed
-    If MsgBox("Truncate table " & tableName & "?", vbYesNo + vbQuestion, "DAOTruncate") = vbNo Then
+    If MsgBox("Truncate table " & tableName & "?", vbYesNo + vbQuestion, ProcName) = vbNo Then
         Exit Function
     End If
     
@@ -87,7 +87,7 @@ Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As Strin
     DAOTruncate = True
     
     ' show message if notifyUser
-    If notifyUser Then MsgBox tableName & " successfully truncated.", vbInformation, "DAOTruncate"
+    If notifyUser Then MsgBox tableName & " successfully truncated.", vbInformation, ProcName
 
 ExitAttempt:
 Finally:
@@ -97,7 +97,7 @@ Finally:
     ' if is ddl error, indicate
     If isDDLErr And notifyUser Then
         MsgBox "Error Number " & errNum & " occurred when attempting the DDL operation." & vbCrLf & vbCrLf & "Please " & _
-            "make sure the table is not in use when truncating." & vbCrLf & vbCrLf & "Details: " & errDesc, vbInformation, "DAOTruncate"
+            "make sure the table is not in use when truncating." & vbCrLf & vbCrLf & "Details: " & errDesc, vbInformation, ProcName
     End If
     Exit Function
 
