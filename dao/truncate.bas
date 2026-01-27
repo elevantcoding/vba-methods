@@ -32,7 +32,9 @@ Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As Strin
     ' attempt to set named column for table
     On Error Resume Next
     Set fld = tdf.Fields(columnName)
-    On Error GoTo 0
+    
+    ' resume exception handling
+    On Error GoTo Except
     
     ' if not set column, column does not exist
     If fld Is Nothing Then
