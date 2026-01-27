@@ -28,9 +28,11 @@ Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As Strin
         MsgBox tableName & " has established relationships and cannot be truncated.", vbInformation, ProcName
         Exit Function
     End If
-    
-    ' attempt to set named column for table
+
+    ' suppress exception handling
     On Error Resume Next
+    
+    ' attempt to set named column for table    
     Set fld = tdf.Fields(columnName)
     
     ' resume exception handling
