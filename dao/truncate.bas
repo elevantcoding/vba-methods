@@ -5,15 +5,15 @@
 ' gracefully performs rollback and exit
 ' best for staging tables / not known to work on tables with established relationships
 
-Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As String, Optional ByVal blnNotify As Boolean = False) As Boolean
+Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As String, Optional ByVal notifyUser As Boolean = False) As Boolean
     On Error GoTo Except
 
     ' similar to t-sql truncate:
     ' delete all records in a table and reset autonumber column
     ' works for tables without relationships (eg. staging tables)
     Const ProcName As String = "DAOTruncate"
-    Dim db As DAO.Database, tdf As DAO.TableDef, fld As DAO.Field, blnTrans As Boolean
-    Dim errNum As Long, errDesc As String, blnDDLError As Boolean
+    Dim db As DAO.Database, tdf As DAO.TableDef, fld As DAO.Field, inTrans As Boolean
+    Dim errNum As Long, errDesc As String, isDDLErr As Boolean
     
     DAOTruncate = False
     
@@ -60,7 +60,7 @@ Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As Strin
     
     ' perform ops as batch transaction
     DBEngine.BeginTrans
-    blnTrans = True
+    inTrans = True
     
     ' delete records
     db.Execute "DELETE FROM " & tableName & ";", 128
@@ -74,27 +74,27 @@ Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As Strin
     
     ' if err is found, is ddl error, ExitAttempt to rollback and notify
     If errNum <> 0 Then
-        blnDDLError = True
+        isDDLErr = True
         GoTo ExitAttempt
     End If
     
     ' commit the transactions
     DBEngine.CommitTrans
-    blnTrans = False
+    inTrans = False
     
     ' success
     DAOTruncate = True
     
-    ' show message if blnNotify
-    If blnNotify Then MsgBox tableName & " successfully truncated.", vbInformation, "DAOTruncate"
+    ' show message if notifyUser
+    If notifyUser Then MsgBox tableName & " successfully truncated.", vbInformation, "DAOTruncate"
 
 ExitAttempt:
 Finally:
     ' if transaction is open when reaching finally, rollback
-    If blnTrans Then DBEngine.Rollback
+    If inTrans Then DBEngine.Rollback
     
     ' if is ddl error, indicate
-    If blnDDLError Then
+    If isDDLErr And notifyUser Then
         MsgBox "Error Number " & errNum & " occurred when attempting the DDL operation." & vbCrLf & vbCrLf & "Please " & _
             "make sure the table is not in use when truncating." & vbCrLf & vbCrLf & "Details: " & errDesc, vbInformation, "DAOTruncate"
     End If
