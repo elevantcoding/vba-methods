@@ -87,7 +87,7 @@ Finally:
 Except:
     Select Case Err.Number
         Case 3211
-            MsgBox "Table is in use.", vbInformation, ProcName
+            MsgBox "Truncation cannot occur.  Table is in use.", vbInformation, ProcName
         Case Else
         ReportExcept Err.Number, Err.Description, Erl, ProcName, ModName, src
     End Select
