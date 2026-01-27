@@ -26,9 +26,9 @@ Function ValidHexValues(ByVal myhexstring As String) As Boolean
         On Error Resume Next
         char = Chr(CLng("&H" & Mid(myhexstring, i, 2)))
         isvalidhex = (Err.Number = 0)
+        Err.Clear
         On Error GoTo 0
         If Not isvalidhex Then
-            Err.Clear
             Exit Function
         End If
     Next
@@ -488,6 +488,7 @@ Function ValidateXorRange() As Long
     Next
     ValidateXorRange = C
 End Function
+
 
 
 
