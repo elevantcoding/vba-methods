@@ -2,8 +2,8 @@
 ' batched transaction to perform both:
 ' delete all table records and reset counter (identity)
 ' standard error handling does not trap 3211 (when DDL action on table in use)
-' so this function handles the error within the code module and
-' gracefully performs rollback and exit
+' so this function handles the error directly within the procedure
+' to gracefully perform rollback and exit
 ' best for staging tables / not known to work on tables with established relationships
 
 Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As String, Optional ByVal notifyUser As Boolean = False) As Boolean
