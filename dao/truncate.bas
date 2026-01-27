@@ -1,4 +1,4 @@
-' performs a truncate operation in VBA
+' performs a truncate table operation in VBA
 ' batched transaction to perform both:
 ' delete all table records and reset counter (identity)
 ' standard error handling does not trap 3211 (when DDL action on table in use)
@@ -9,7 +9,7 @@
 Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As String, Optional ByVal notifyUser As Boolean = False) As Boolean
     On Error GoTo Except
 
-    ' similar to t-sql truncate:
+    ' similar to t-sql truncate table:
     ' delete all records in a table and reset autonumber column
     ' works for tables without relationships (eg. staging tables)
     Const ProcName As String = "DAOTruncate"
