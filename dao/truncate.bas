@@ -1,5 +1,6 @@
 ' performs a truncate operation in VBA
-' batched transactions to delete record and reset counter
+' batched transaction to perform both:
+' delete all table records and reset counter (identity)
 ' standard error handling does not trap 3211 (when DDL action on table in use)
 ' so this function handles the error within the code module and
 ' gracefully performs rollback and exit
