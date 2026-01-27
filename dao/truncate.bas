@@ -1,20 +1,16 @@
-' performs a truncate table operation in VBA
+' similar to t-sql truncate table:
 ' batched transaction to perform both:
 ' delete all table records and reset counter (identity)
-' standard error handling does not trap 3211 (when DDL action on table in use)
-' so this function handles the error directly within the procedure
-' to gracefully perform rollback and exit
+' gracefully performs rollback and exit if 3211 or other err
 ' best for staging tables / not known to work on tables with established relationships
 
 Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As String, Optional ByVal notifyUser As Boolean = False) As Boolean
     On Error GoTo Except
 
-    ' similar to t-sql truncate table:
     ' delete all records in a table and reset autonumber column
     ' works for tables without relationships (eg. staging tables)
     Const ProcName As String = "DAOTruncate"
     Dim db As DAO.Database, tdf As DAO.TableDef, fld As DAO.Field, inTrans As Boolean
-    Dim errNum As Long, errDesc As String, isDDLErr As Boolean
     
     DAOTruncate = False
     
@@ -65,19 +61,8 @@ Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As Strin
     
     ' delete records
     db.Execute "DELETE FROM " & tableName & ";", 128
-
-    ' encapsulate ddl action in error handling
-    On Error Resume Next
+    ' ddl statement
     db.Execute "ALTER TABLE " & tableName & " ALTER COLUMN " & columnName & " COUNTER(1,1);", 128
-    errNum = Err.Number
-    errDesc = Err.Description
-    Err.Clear
-    
-    ' if err is found, is ddl error, ExitAttempt to rollback and notify
-    If errNum <> 0 Then
-        isDDLErr = True
-        GoTo ExitAttempt
-    End If
     
     ' commit the transactions
     DBEngine.CommitTrans
@@ -92,17 +77,16 @@ Public Function DAOTruncate(ByVal tableName As String, ByVal columnName As Strin
 ExitAttempt:
 Finally:
     ' if transaction is open when reaching finally, rollback
-    If inTrans Then DBEngine.Rollback
-    
-    ' if is ddl error, indicate
-    If isDDLErr And notifyUser Then
-        MsgBox "Error Number " & errNum & " occurred when attempting the DDL operation." & vbCrLf & vbCrLf & "Please " & _
-            "make sure the table is not in use when truncating." & vbCrLf & vbCrLf & "Details: " & errDesc, vbInformation, ProcName
-    End If
+    If inTrans Then DBEngine.Rollback    
     Exit Function
 
 Except:
-    ReportExcept Err.Number, Err.Description, Erl, ProcName, ModName, src
+    Select Case Err.Number
+        Case 3211
+            MsgBox "Table is in use.", vbInformation, ProcName
+        Case Else
+        ReportExcept Err.Number, Err.Description, Erl, ProcName, ModName, src
+    End Select
     Resume Finally
 End Function
 
