@@ -41,9 +41,9 @@ Public Sub UpdateQB(ByVal dFrom As Date)
     DoCmd.RepaintObject acForm, MsgFrm
     DoEvents
     
-    'make sure contract numbers in quickbooks inv and cm are in tblContracts in GBLDB
-    If Not ConfirmMatchingContracts(dFrom) Then GoTo ExitProcessing
-            
+
+    ' pre-checks
+    If Not ConfirmMatchingContracts(dFrom) Then GoTo ExitProcessing            
     If Not ReviewCC(dFrom) Then GoTo ExitProcessing
     
     Call DisplayMsg(, "Updating", "Just a Moment")
