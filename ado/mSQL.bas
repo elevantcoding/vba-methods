@@ -5,8 +5,8 @@ Public SQLPrm As ADODB.Parameter
 
 ' for use in SQLCmdGlobal
 Public Enum CmdExecMethod
-    emOrigin
-    emCaller
+    emOrigin ' Execute SQL immediately within SQLCmdGlobal
+    emCaller ' Setup Command and Params only; execution handled by the calling proc
 End Enum
 
 ' global ADO Command function, returns true if successful
