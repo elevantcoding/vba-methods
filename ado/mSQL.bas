@@ -33,7 +33,7 @@ Public Function SQLCmdGlobal(ByVal CmdText As String, ByRef Cmd As ADODB.Command
     
     ' ByRef Cmd passes the specified command obj through the call stack: is modifiable by SQLCmdAsType as ByRef as well for use in this proc
     ' designed to be called using ADOParam if sp or cmd text has params
-    
+    ' CmdExecMethod: Public Enum in this module: emOrigin = execute from SQLCmdGlobal, emCaller = execute from calling procedure.
     ' default
     SQLCmdGlobal = False
     
