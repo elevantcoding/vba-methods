@@ -9,18 +9,18 @@ Public Enum CmdExecMethod
     emCaller
 End Enum
 
--- global ADO Command function, returns true if successful
---------------------------------------------------------------------------------
--- if call SQLCmdGlobal directly, call params using ADOParam inside of Array
--- (i.e., vParams as Variant: vParams = Array(ADOParam(name, type, direction, size, value), ADOParam(name, type, direction, size, value)), SQLCmdGlobal(SQL, Cmd, acCmdText, vParams)
+' global ADO Command function, returns true if successful
+' --------------------------------------------------------------------------------
+' if call SQLCmdGlobal directly, call params using ADOParam inside of Array
+' (i.e., vParams as Variant: vParams = Array(ADOParam(name, type, direction, size, value), ADOParam(name, type, direction, size, value)), SQLCmdGlobal(SQL, Cmd, acCmdText, emOrigin, vParams)
 
--- if call SQLCmdGlboal from wrapper, call params using ADOParam
--- (i.e, SQLCmdGlobal(SQL, Cmd, acCmdText, ADOParam(name, type, direction, size, value))
--- (i.e. SQLCmdGlobal(SQL, Cmd, acCmdStoredProc, ADOParam(name, type, direction, size, value))
---------------------------------------------------------------------------------
--- see helper function in this module: ADOParam
--- parameter array for receiving ADO parameters
--- p(0), p(1), p(2), p(3), p(4) represent args in .CreateParameter(name, type, direction, size, value)
+' if call SQLCmdGlboal from wrapper, call params using ADOParam
+' (i.e, SQLCmdGlobal(SQL, Cmd, acCmdText, emOrigin, ADOParam(name, type, direction, size, value))
+' (i.e. SQLCmdGlobal(SQL, Cmd, acCmdStoredProc, emOrigin, ADOParam(name, type, direction, size, value))
+' --------------------------------------------------------------------------------
+' see helper function in this module: ADOParam
+' parameter array for receiving ADO parameters
+' p(0), p(1), p(2), p(3), p(4) represent args in .CreateParameter(name, type, direction, size, value)
 
 Public Function SQLCmdGlobal(ByVal CmdText As String, ByRef Cmd As ADODB.Command, ByVal CmdType As ADODB.CommandTypeEnum, _
           CmdMethod As CmdExecMethod, ParamArray CmdParams() As Variant) As Boolean
@@ -100,7 +100,7 @@ Except:
     Resume Finally
 End Function
 
--- helper: returns a variant to be used in the ParamArray of SQLCmdGlobal
+' helper: returns a variant to be used in the ParamArray of SQLCmdGlobal
 Public Function ADOParam(ByVal PrmName As String, ByVal PrmType As ADODB.DataTypeEnum, ByVal PrmDir As ADODB.ParameterDirectionEnum, _
           ByVal PrmSize As Long, ByVal PrmVal As Variant, Optional DecPrecision As Long = 0, Optional DecScale As Long = 0) As Variant
     On Error GoTo Except
@@ -130,7 +130,7 @@ Except:
     Resume Finally
 End Function
 
--- helper function: determines if params passed in paramarray to SQLCmdGlobal are an array or variant
+' helper function: determines if params passed in paramarray to SQLCmdGlobal are an array or variant
 Public Function ADOParamResolve(ByVal Params As Variant) As Variant
     On Error GoTo Except
     Const ProcName As String = "ADOParamResolve"
@@ -151,8 +151,7 @@ Except:
     Resume Finally
 End Function
 
--- Cmd is ByRef so reference can be modified as needed
--- 
+' Cmd is ByRef so reference can be modified as needed
 Sub SQLCmdAsType(Optional ByRef Cmd As ADODB.Command = Nothing, Optional ByVal CmdType As ADODB.CommandTypeEnum = adCmdStoredProc, Optional ByVal lTimeout As Long = 90)
     On Error GoTo Except
     
@@ -188,8 +187,8 @@ Except:
     Resume Finally
 End Sub
 
--- wrapper that uses SQLCmdGlobal
--- return a one-row result (for aggregates, one-row lookups, etc.)
+' wrapper that uses SQLCmdGlobal
+' return a one-row result (scalar, for aggregates, one-row lookups, etc.)
 Public Function ADOResult(ByVal SQL As String, ByVal CmdType As ADODB.CommandTypeEnum, _
           ParamArray Params() As Variant) As Variant
     On Error GoTo Except
@@ -232,7 +231,7 @@ Except:
     Resume Finally
 End Function
 
--- open the global connection obj
+' open the global connection
 Sub OpenSQL(Optional ByVal AttemptOnly As Boolean = False)
     On Error GoTo Except
     Const ProcName As String = "OpenSQL"
@@ -248,7 +247,7 @@ Sub OpenSQL(Optional ByVal AttemptOnly As Boolean = False)
     
     Set SQLConnect = New ADODB.Connection
     SQLConnect.ConnectionTimeout = 20
-    SQLConnect.Open ADOConnect -- connection string
+    SQLConnect.Open ADOConnect ' connection string
  
 Finally:
     Exit Sub
