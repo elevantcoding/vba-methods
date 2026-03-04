@@ -256,3 +256,42 @@ Except:
     If Not AttemptOnly Then ReportExcept Erl, Err.Number, Err.Description, ProcName, ModName
     Resume Finally
 End Sub
+
+' helper function: used in SQLCmdGlobal
+Public Function IsBetween(ByVal evalNum As Double, ByVal valOne As Double, ByVal valTwo As Double) As Boolean
+    Dim val As Double
+    If valOne > valTwo Then
+        val = valOne
+        valOne = valTwo
+        valTwo = val
+    End If
+        
+    IsBetween = (evalNum >= valOne And evalNum <= valTwo)
+End Function
+
+Public Function IsIn(ByVal ValComp As Variant, ParamArray Vals() As Variant) As Boolean
+    On Error GoTo Except
+    
+    Const ProcName As String = "IsIn"
+    Dim i As Long
+    
+    For i = LBound(Vals) To UBound(Vals)
+        If VarType(Vals(i)) = VarType(ValComp) Then
+            If Vals(i) = ValComp Then
+                IsIn = True
+                Exit Function
+            End If
+        End If
+    Next
+    
+    IsIn = False
+    
+Finally:
+    Exit Function
+
+Except:
+    ReportExcept Erl, Err.Number, Err.Description, ProcName, ModName
+    Resume Finally    
+End Function
+
+
