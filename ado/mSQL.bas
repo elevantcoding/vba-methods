@@ -157,7 +157,8 @@ Sub SQLCmdAsType(Optional ByRef Cmd As ADODB.Command = Nothing, Optional ByVal C
     On Error GoTo Except
     
     Const ProcName As String = "SQLCmdAsType"
-    
+
+    ' open the global SQL connection if it is not open
     If Not ValidSQLConnect Then OpenSQL
 
     ' if no Cmd passed to proc, use global SQLCmd
@@ -230,3 +231,30 @@ Except:
     ReportExcept Erl, Err.Number, Err.Description, ProcName, ModName
     Resume Finally
 End Function
+
+-- open the global connection obj
+Sub OpenSQL(Optional ByVal AttemptOnly As Boolean = False)
+    On Error GoTo Except
+    Const ProcName As String = "OpenSQL"
+    
+    ' connect to SQL
+    
+    ' if the connection exists, and is open, exit
+    ' else re-instantiate
+    If Not SQLConnect Is Nothing Then
+        If SQLConnect.State = adStateOpen Then Exit Sub
+        Set SQLConnect = Nothing
+    End If
+    
+    Set SQLConnect = New ADODB.Connection
+    SQLConnect.ConnectionTimeout = 20
+    SQLConnect.Provider = SQLDBProvider -- provider
+    SQLConnect.Open ADOConnect -- connection string
+ 
+Finally:
+    Exit Sub
+
+Except:
+    If Not AttemptOnly Then ReportExcept Erl, Err.Number, Err.Description, ProcName, ModName
+    Resume Finally
+End Sub
