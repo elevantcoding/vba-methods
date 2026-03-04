@@ -14,7 +14,7 @@ End Enum
 ' if call SQLCmdGlobal directly, call params using ADOParam inside of Array
 ' (i.e., vParams as Variant: vParams = Array(ADOParam(name, type, direction, size, value), ADOParam(name, type, direction, size, value)), SQLCmdGlobal(SQL, Cmd, acCmdText, emOrigin, vParams)
 
-' if call SQLCmdGlboal from wrapper, call params using ADOParam
+' if call SQLCmdGlobal from wrapper, call params using ADOParam
 ' (i.e, SQLCmdGlobal(SQL, Cmd, acCmdText, emOrigin, ADOParam(name, type, direction, size, value))
 ' (i.e. SQLCmdGlobal(SQL, Cmd, acCmdStoredProc, emOrigin, ADOParam(name, type, direction, size, value))
 ' --------------------------------------------------------------------------------
