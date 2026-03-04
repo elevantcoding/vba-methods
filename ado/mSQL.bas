@@ -68,7 +68,7 @@ Public Function SQLCmdGlobal(ByVal CmdText As String, ByRef Cmd As ADODB.Command
                 If Not IsBetween(UBound(p), 4, 6) Then RaiseCustomMsg SysSQLSPParams, ProcName, MsgDetail
                 
                 ' if prm type is string and prm size is 0, raise err
-                If IsIn(p(1), adVarWChar, adVarWChar) And p(3) = 0 Then RaiseCustomMsg SysSQLSPParamsSize, ProcName, MsgDetail
+                If IsIn(p(1), adVarChar, adVarWChar) And p(3) = 0 Then RaiseCustomMsg SysSQLSPParamsSize, ProcName, MsgDetail
                 
                 ' set parameters
                 Set SQLPrm = .CreateParameter(p(0), p(1), p(2), p(3), p(4))
@@ -269,6 +269,7 @@ Public Function IsBetween(ByVal evalNum As Double, ByVal valOne As Double, ByVal
     IsBetween = (evalNum >= valOne And evalNum <= valTwo)
 End Function
 
+-- helper function: used in SQLCmdGlobal to detect whether 
 Public Function IsIn(ByVal ValComp As Variant, ParamArray Vals() As Variant) As Boolean
     Dim i As Long
     
