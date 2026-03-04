@@ -274,11 +274,9 @@ Public Function IsIn(ByVal ValComp As Variant, ParamArray Vals() As Variant) As 
     Dim i As Long
     
     For i = LBound(Vals) To UBound(Vals)
-        If VarType(Vals(i)) = VarType(ValComp) Then
-            If Vals(i) = ValComp Then
-                IsIn = True
-                Exit Function
-            End If
+        If Vals(i) = ValComp Then
+            IsIn = True
+            Exit Function
         End If
     Next
     
