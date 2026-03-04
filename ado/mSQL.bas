@@ -248,7 +248,6 @@ Sub OpenSQL(Optional ByVal AttemptOnly As Boolean = False)
     
     Set SQLConnect = New ADODB.Connection
     SQLConnect.ConnectionTimeout = 20
-    SQLConnect.Provider = SQLDBProvider -- provider
     SQLConnect.Open ADOConnect -- connection string
  
 Finally:
