@@ -1,9 +1,15 @@
---  traverse project for FindValue 
+-- traverse project for FindValue 
 -- uses RegEx helper functions, bitwise enums
 -- bitwise enums allows multiple enums to be passed in a single parameter
 -- looks in tables, queries (excluding ~sq), forms, reports, modules
 -- excludes ~sq queries because form traversal will report FindValue found in row-source queries
 
+-- options:
+-- scope (SearchScope)
+-- create text file of results found
+-- display notification during search (custom, not in this module)
+-- exit upon first count of FindValue
+-- search declaration lines only
 
 ' used in UtliizationV1 for identifying
 ' areas of the system to search for
