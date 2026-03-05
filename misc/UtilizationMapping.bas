@@ -67,7 +67,7 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
     
     ' if all, forms or reports, notify regarding nested objects
     If ((Scope And ssForms) = ssForms) Or ((Scope And ssReports) = ssReports) Then
-        If MsgBox("For this utility to properly inspect form and report objects, please close forms / reports containing nested objects before running this utility. " & _
+        If MsgBox("For this utility to properly inspect form and report objects, please close forms / reports containing nested objects. " & _
             "Do you want to continue?", vbYesNo + vbQuestion, "Continue?") = vbNo Then
             Exit Function
         End If
