@@ -1,11 +1,11 @@
 ' usage:
-' UseDictionary(daNew)
+' UseDictionary(daNew) ' instantiate
 ' do stuff
-' If UseDictionary(adExists, [KeyID]) Then
+' If UseDictionary(adExists, [KeyID]) Then 'eval if a key exists
 ' do stuff
-' UseDictionary(adAddEntry, [KeyID], [KeyValue])
+' UseDictionary(adAddEntry, [KeyID], [KeyValue]) ' add an entry
 ' do stuff
-' UseDictionary(daClose)
+' UseDictionary(daClose) ' clear and close dictionary
 
 Public dict As Object
 
