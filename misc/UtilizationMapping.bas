@@ -53,7 +53,7 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
     ' uses public enum SearchScope, SearchOptions, ExecutionOptions as bit values with Public Const ssAll:
     ' allows more than one search scope to be supplied to the Scope parameter using Or
     ' ssAll is not specified in the proc as an option becauase it is understood as
-    ' the sum of all possibilities to value of 31 (not ssDecLinesOnly which is 32).
+    ' the sum of all possibilities
     
     Dim db As DAO.Database, tdf As DAO.TableDef, qdf As DAO.QueryDef, fld As DAO.Field, prp As DAO.Property
     Dim obj As AccessObject, blnClose As Boolean, frm As Access.Form, Ctl As Control, rpt As Access.Report
