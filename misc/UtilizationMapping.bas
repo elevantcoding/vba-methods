@@ -1,15 +1,15 @@
--- traverse project for FindValue 
--- uses RegEx helper functions, bitwise enums
--- bitwise enums allows multiple enums to be passed in a single parameter
--- looks in tables, queries (excluding ~sq), forms, reports, modules
--- excludes ~sq queries because form traversal will report FindValue found in row-source queries
+' traverse project for FindValue 
+' uses RegEx helper functions, bitwise enums
+' bitwise enums allows multiple enums to be passed in a single parameter
+' looks in tables, queries (excluding ~sq), forms, reports, modules
+' excludes ~sq queries because form traversal will report FindValue found in row-source queries
 
--- options:
--- scope (SearchScope)
--- create text file of results found
--- display notification during search (custom, not in this module)
--- exit upon first count of FindValue
--- search declaration lines only
+' options:
+' scope (SearchScope)
+' create text file of results found
+' display notification during search (custom, not in this module)
+' exit upon first count of FindValue
+' search declaration lines only
 
 ' used in UtliizationV1 for identifying
 ' areas of the system to search for
@@ -56,30 +56,38 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
     ' the sum of all possibilities
     
     Dim db As DAO.Database, tdf As DAO.TableDef, qdf As DAO.QueryDef, fld As DAO.Field, prp As DAO.Property
-    Dim obj As AccessObject, blnClose As Boolean, frm As Access.Form, Ctl As Control, rpt As Access.Report
+    Dim obj As AccessObject, blnClose As Boolean, frm As Access.Form, ctl As Control, rpt As Access.Report
     Dim vbc As VBIDE.VBComponent, cmod As VBIDE.CodeModule, CodeModLine As Long, CountLines As Long, Content As String, ModName As String, ReportedModName As String, ModProcName As String, ReportedModProcName As String
     Dim Stream As Object, FileName As String, FilePath As String, CollectionExists As Boolean, FindValueCount As Long
     Dim WriteResults As Boolean, DisplayProgress As Boolean, ExitOnFirstFind As Boolean
+    Dim i As Long
     
     FindValue = Trim(FindValue)
     
     If Len(FindValue) = 0 Then Exit Function
     
-    ' if all, forms or reports, notify regarding nested objects
+    ' execution options
+    WriteResults = (Exec And eoWriteResults) = eoWriteResults
+    DisplayProgress = (Exec And eoDisplayProgress) = eoDisplayProgress
+    ExitOnFirstFind = (Exec And eoExitOnFirstFind) = eoExitOnFirstFind
+    
+    ' if all, forms or reports and main form is open, indicate forms / reports will be closed and confirm to proceed
     If ((Scope And ssForms) = ssForms) Or ((Scope And ssReports) = ssReports) Then
-        If MsgBox("For this utility to properly inspect form and report objects, please close forms / reports containing nested objects. " & _
-            "Do you want to continue?", vbYesNo + vbQuestion, "Continue?") = vbNo Then
-            Exit Function
+        If FormIsOpen(MainFrm) Then
+            If MsgBox("For this utility to properly inspect form and report objects, open forms (except Welcome) and reports will be closed. " & _
+                "Do you want to continue?", vbYesNo + vbQuestion, "Continue?") = vbNo Then
+                Exit Function
+            End If
         End If
+        If (Scope And ssForms) = ssForms Then ObjectsClose acForm
+        If (Scope And ssReports) = ssReports Then ObjectsClose acReport
     End If
     
     ' default value count
     FindValueCount = 0
     
-    ' execution options
-    WriteResults = (Exec And eoWriteResults) = eoWriteResults
-    DisplayProgress = (Exec And eoDisplayProgress) = eoDisplayProgress
-    ExitOnFirstFind = (Exec And eoExitOnFirstFind) = eoExitOnFirstFind
+    ' disable repaint if not displaying progress form
+    If Not DisplayProgress Then Application.Echo False
     
     ' create text file only if WriteResults
     If WriteResults Then
@@ -233,7 +241,7 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
   
         ' find value as form name
         CollectionExists = False
-        For Each obj In Application.CurrentProject.AllForms
+        For Each obj In CurrentProject.AllForms
             CollectionExists = True
             If obj.Name = FindValue Then
                 If WriteResults Then Stream.WriteLine "Is a Named Form"
@@ -241,13 +249,13 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
                 If ExitOnFirstFind Then: UtilizationV1 = FindValueCount: GoTo ExitProcessing
             End If
   
-            ' open forms, if not already open
+            ' open form in design view, if not already open
             blnClose = False
             If Not obj.IsLoaded Then
                 DoCmd.OpenForm obj.Name, acDesign, , , , acHidden
                 blnClose = True
             End If
-  
+            
             Set frm = Forms(obj.Name)
   
             'inspect form RecordSource, control's ControlSource and control's RowSource
@@ -263,14 +271,14 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
                 End If
             Next
   
-            For Each Ctl In frm.Controls
-                Select Case Ctl.ControlType
+            For Each ctl In frm.Controls
+                Select Case ctl.ControlType
                     Case acTextBox, acComboBox, acListBox
-                        For Each prp In Ctl.Properties
+                        For Each prp In ctl.Properties
                             If prp.Name = "ControlSource" Or prp.Name = "RowSource" Then
                                 If Nz(prp.Value, "") <> "" Then
                                     If IsWholeValue(prp.Value, FindValue) Then
-                                        If WriteResults Then Stream.WriteLine "In Control or RowSource of " & Ctl.Name & " of " & frm.Name
+                                        If WriteResults Then Stream.WriteLine "In Control or RowSource of " & ctl.Name & " of " & frm.Name
                                         FindValueCount = FindValueCount + 1
                                         If ExitOnFirstFind Then: UtilizationV1 = FindValueCount: GoTo ExitProcessing
                                     End If
@@ -278,7 +286,7 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
                             End If
                         Next
                     Case acSubform
-                        If Ctl.Name = FindValue Then
+                        If ctl.Name = FindValue Then
                             If WriteResults Then Stream.WriteLine "Is a SubForm on " & frm.Name
                             FindValueCount = FindValueCount + 1
                             If ExitOnFirstFind Then: UtilizationV1 = FindValueCount: GoTo ExitProcessing
@@ -297,7 +305,7 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
         End If
     End If
     
-    ' bitwise: for search scope reports (or all)
+    ' bitwise / bitmask: for search scope reports (or all)
     If (Scope And ssReports) = ssReports Then
     
         If WriteResults Then
@@ -312,7 +320,7 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
         End If
     
         CollectionExists = False
-        For Each obj In Application.CurrentProject.AllReports
+        For Each obj In CurrentProject.AllReports
             CollectionExists = True
     
             If obj.Name = FindValue Then
@@ -343,14 +351,14 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
                 End If
             Next
   
-            For Each Ctl In rpt.Controls
-                Select Case Ctl.ControlType
+            For Each ctl In rpt.Controls
+                Select Case ctl.ControlType
                     Case acTextBox, acComboBox, acListBox
-                        For Each prp In Ctl.Properties
+                        For Each prp In ctl.Properties
                             If prp.Name = "ControlSource" Or prp.Name = "RowSource" Then
                                 If Nz(prp.Value, "") <> "" Then
                                     If IsWholeValue(prp.Value, FindValue) Then
-                                        If WriteResults Then Stream.WriteLine "In Control or RowSource of " & Ctl.Name & " of " & rpt.Name
+                                        If WriteResults Then Stream.WriteLine "In Control or RowSource of " & ctl.Name & " of " & rpt.Name
                                         FindValueCount = FindValueCount + 1
                                         If ExitOnFirstFind Then: UtilizationV1 = FindValueCount: GoTo ExitProcessing
                                     End If
@@ -358,7 +366,7 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
                             End If
                         Next
                     Case acSubform
-                        If Ctl.Name = FindValue Then
+                        If ctl.Name = FindValue Then
                             If WriteResults Then Stream.WriteLine "Is a SubReport on " & rpt.Name
                             FindValueCount = FindValueCount + 1
                             If ExitOnFirstFind Then: UtilizationV1 = FindValueCount: GoTo ExitProcessing
@@ -378,7 +386,7 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
         End If
     End If
     
-    ' bitwise
+    ' bitwise / bitmask
     If (Scope And ssModules) = ssModules Then
         If WriteResults Then
             Stream.WriteLine "Modules"
@@ -444,6 +452,9 @@ Finally:
     ' close displayfrm
     If DisplayProgress Then CloseMsgFrm
     
+    ' allow repaint
+    Application.Echo True
+    
     ' report completed, open
     If WriteResults Then
         If Not Stream Is Nothing Then
@@ -459,6 +470,22 @@ Except:
     ReportExcept Erl, Err.Number, Err.Description, ProcName, ModName
     Resume Finally
 End Function
+
+' helper function to close forms or reports
+Sub ObjectsClose(Optional ByVal ObjType As AcObjectType = acForm)
+
+    Dim i As Long, col As Object
+    Set col = IIf(ObjType = acForm, Forms, Reports)
+    i = col.count - 1
+    Do While i >= 0
+        If InfiniteLoop(col(i).Name) Then Exit Sub
+        If Not IsIn(col(i).Name, MsgFrm, MainFrm) Then
+            DoCmd.Close ObjType, col(i).Name, acSaveYes
+        End If
+        i = i - 1
+    Loop
+
+End Sub
 
 Private Function EscRegex(ByVal s As String) As String
 
