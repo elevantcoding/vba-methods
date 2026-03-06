@@ -449,11 +449,11 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
     
 ExitProcessing:
 Finally:
-    ' close displayfrm
-    If DisplayProgress Then CloseMsgFrm
-    
     ' allow repaint
     Application.Echo True
+    
+    ' close displayfrm
+    If DisplayProgress Then CloseMsgFrm
     
     ' report completed, open
     If WriteResults Then
