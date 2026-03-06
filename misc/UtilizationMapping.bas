@@ -431,9 +431,10 @@ Function UtilizationV1(ByVal FindValue As String, Optional ByVal Scope As Search
                             
                             If ReportedModProcName <> ModProcName Then
                                 If WriteResults Then Stream.WriteLine vbTab & "Procedure " & ModProcName
-                                If WriteResults Then Stream.WriteLine vbTab & vbTab & Content
                                 ReportedModProcName = ModProcName
                             End If
+                            
+                            If WriteResults Then Stream.WriteLine vbTab & vbTab & Content
                             
                             FindValueCount = FindValueCount + 1
                             If ExitOnFirstFind Then: UtilizationV1 = FindValueCount: GoTo ExitProcessing
