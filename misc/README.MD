@@ -24,3 +24,39 @@ InterpolateColor - steps through color hues from white to desired RGB, includes 
 
 CompareStrings - compare two string values and return a % difference to help avoid near-duplicates and for inference
 
+# UtilizationMappings
+
+A static analysis engine for Microsoft Access applications. 
+Searches across all object types in an Access project to find 
+every reference to a given value.
+
+## Problem It Solves
+In large Access applications, renaming a table, column, or 
+procedure requires knowing every place it is referenced — 
+including form RecordSources, control RowSources, report 
+bindings, and VBA code. Standard dependency tools miss 
+dynamic SQL references entirely. This engine finds them all.
+
+## Search Scope (Bitwise)
+- Tables — names, column names, row sources, default values
+- Queries — names, column names, SQL definitions
+- Forms — record sources, control sources, row sources
+- Reports — record sources, control sources
+- Modules — line-by-line traversal with procedure identification,
+  comment skipping, and declaration-only or body-only options
+
+## Options
+- Write results to text file
+- Display progress
+- Exit on first find
+- Module line count mode
+
+## Key Feature
+Identifies references inside Dynamic SQL strings — something 
+SSMS dependency checks and standard Access tools cannot 
+natively detect. Originally built to protect objects referenced 
+in dynamic SQL from accidental deletion.
+
+## Requirements
+Microsoft VBE Extensibility reference
+Microsoft Access project (not ADP)
