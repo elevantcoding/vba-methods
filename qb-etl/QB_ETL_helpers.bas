@@ -81,7 +81,7 @@ Public Function UsesADOSize(ByVal lADOType As Long) As Boolean
 UsesADOSize = False
     
     Select Case lADOType
-        Case 200, 201, 202
+        Case adVarChar, adVarWChar, adLongVarChar, adLongVarWChar
             UsesADOSize = True
             Exit Function
     End Select
