@@ -6,6 +6,26 @@ automation built in Microsoft Access / VBA.
 
 ## Contents
 
+## ADO Utilities
+Centralized ADO command execution framework.
+
+**SQLCmdGlobal** — Global ADO Command executor with 
+parameterized stored procedure and SQL statement support. 
+Enum-driven execution model (execute immediately or defer 
+to caller). Handles parameter type validation, decimal 
+precision/scale, and connection lifecycle management.
+
+**ADOResult** — Scalar lookup wrapper enforcing SELECT-only 
+queries with single-row validation.
+
+Location: `/ado`
+
+## DAO Utilities
+**DAOTruncate** — Transactional Access table truncation 
+with AutoNumber reseed. Validates relationships, column 
+type, and user confirmation before executing DELETE and 
+ALTER TABLE as an atomic operation.
+
 ### QuickBooks → SQL Server ETL
 High-performance ETL pipeline that:
 - Reads ODBC-linked QuickBooks data
