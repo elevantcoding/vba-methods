@@ -1,24 +1,61 @@
 # miscellaneous vba
 # GlobalDictionary
 
-A utility module for Microsoft Access / VBA that simplifies 
-Dictionary object instantiation and lifecycle management.
+A VBA utility module that provides a single, unified interface 
+for all Scripting.Dictionary operations using an enum-driven 
+action pattern.
 
 ## Problem It Solves
-Declaring, instantiating, and cleaning up Scripting.Dictionary 
-objects requires repetitive boilerplate across every procedure 
-that uses one. This module provides a single global function 
-that handles instantiation via ByRef, returning a ready-to-use 
-Dictionary object and automatically managing cleanup.
+Working with Dictionary objects in VBA requires repetitive 
+boilerplate: declare the variable, create the object, check 
+existence before adding, handle cleanup. Across a large 
+project this scatters dictionary lifecycle management 
+throughout the codebase. GlobalDictionary centralizes all 
+dictionary operations into a single function call.
 
-## Usage
-Pass an uninitialized Dictionary variable ByRef. The function 
-sets it up with your preferred CompareMode and returns it 
-ready to use. No Set/New boilerplate. No forgotten cleanup.
+## Design
+UseDictionary accepts a ByRef dictionary object and a 
+DictActions enum value, performing one operation per call 
+and returning True on success. The ByRef pattern means the 
+dictionary is instantiated and managed through the function 
+without requiring the caller to use Set or New directly.
+
+## DictActions Enum
+
+| Action       | Description                                      |
+|--------------|--------------------------------------------------|
+| daNew        | Create a new Dictionary, clearing any existing   |
+| daInit       | Check whether dictionary is initialized          |
+| daAddEntry   | Add key/value or update value if key exists      |
+| daExists     | Check whether a key exists                       |
+| daRead       | Read a value by key, returned via ByRef KeyValue |
+| daRemoveEntry| Remove a key/value pair if it exists             |
+| daCount      | Return True if dictionary has any entries        |
+| daClose      | RemoveAll and Set to Nothing — full cleanup      |
+
+## Usage Example
+Dim myDict As Object
+UseDictionary myDict, daNew
+UseDictionary myDict, daAddEntry, "ProjectID", 12345
+UseDictionary myDict, daRead, "ProjectID", myValue
+UseDictionary myDict, daClose
+
+## Key Behaviors
+- daAddEntry safely handles both new keys and updates 
+  to existing keys without requiring an Exists check 
+  at the call site
+- daRead returns the value via ByRef KeyValue parameter
+- daClose performs full cleanup — RemoveAll then 
+  Set Nothing — preventing memory leaks
+- Guards against calling operational actions on an 
+  uninitialized dictionary — raises custom message 
+  rather than runtime error
 
 ## Requirements
-Microsoft Scripting Runtime reference (or late binding variant 
-included)
+Microsoft Scripting Runtime (early binding) or 
+CreateObject late binding (as implemented)
+Custom error handler (ReportExcept)
+Custom message raising (RaiseCustomMsg)
 
 InterpolateColor - steps through color hues from white to desired RGB, includes form module code example of use (used for splash screen)
 
