@@ -49,13 +49,6 @@ dynamic SQL references entirely. This engine finds them all.
 - Write results to text file
 - Display progress
 - Exit on first find
-- Module line count mode
-
-## Key Feature
-Identifies references inside Dynamic SQL strings — something 
-SSMS dependency checks and standard Access tools cannot 
-natively detect. Originally built to protect objects referenced 
-in dynamic SQL from accidental deletion.
 
 ## Requirements
 Microsoft VBE Extensibility reference
