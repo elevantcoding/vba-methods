@@ -6,7 +6,7 @@ automation built in Microsoft Access / VBA.
 
 ## Contents
 
-## ADO Utilities
+### ADO Utilities
 Centralized ADO command execution framework.
 
 **SQLCmdGlobal** — Global ADO Command executor with 
@@ -20,11 +20,14 @@ queries with single-row validation.
 
 Location: `/ado`
 
-## DAO Utilities
+### DAO Utilities
+
 **DAOTruncate** — Transactional Access table truncation 
 with AutoNumber reseed. Validates relationships, column 
 type, and user confirmation before executing DELETE and 
 ALTER TABLE as an atomic operation.
+
+Location: `/dao`
 
 ### QuickBooks → SQL Server ETL
 High-performance ETL pipeline that:
@@ -47,6 +50,20 @@ interoperability.
 
 Location: `/security`
 
+### Miscellaneous Utilities
+**UseDictionary** — Enum-driven Dictionary lifecycle 
+manager. Single function handles create, read, write, 
+exists check, remove, count, and cleanup via ByRef 
+pattern with Boolean success return.
+
+**UtilizationV1** — Static analysis engine for Access 
+applications. Searches tables, queries, forms, reports, 
+and VBA modules for any value — including inside Dynamic 
+SQL strings that standard dependency tools cannot detect. 
+Bitwise scope and option parameters. Outputs to text file 
+or returns count.
+
+Location: `/misc`
 ### Windows API Utilities
 
 Location: /winapi
@@ -60,6 +77,9 @@ Retrieves machine-level idle time (seconds since last user input) using the Wind
 Useful for session management, inactivity monitoring, and graceful application shutdown in long-running VBA applications.
 
 ## Design Principles
+- Runtime schema introspection — no hardcoded column lists
+- Eval()-based dynamic function resolution — eliminates 
+  form reference dependencies in compiled deployments
 - Transaction safety
 - Schema-driven logic
 - Explicit error boundaries
