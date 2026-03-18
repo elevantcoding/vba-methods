@@ -1,21 +1,13 @@
-' usage:
-' UseDictionary(daNew) ' instantiate
-' do stuff
-' If UseDictionary(adExists, [KeyID]) Then 'eval if a key exists
-' do stuff
-' UseDictionary(adAddEntry, [KeyID], [KeyValue]) ' add an entry
-' do stuff
-' UseDictionary(daClose) ' clear and close dictionary
-
 ' options for UseDictionary
 Public Enum DictActions
-    daAddEntry
-    daRemoveEntry
-    daExists
-    daInUse
     daNew
-    daClose
+    daInit
+    daAddEntry
+    daExists
+    daRemoveEntry
     daRead
+    daCount
+    daClose
 End Enum
 
 Public Function UseDictionary(ByRef dict As Object, ByVal SelectedAction As DictActions, Optional ByVal KeyID As Variant = Null, Optional ByRef KeyValue As Variant = Null) As Boolean
