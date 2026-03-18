@@ -7,8 +7,6 @@
 ' do stuff
 ' UseDictionary(daClose) ' clear and close dictionary
 
-Public dict As Object
-
 ' options for UseDictionary
 Public Enum DictActions
     daAddEntry
@@ -20,27 +18,34 @@ Public Enum DictActions
     daRead
 End Enum
 
-Public Function UseDictionary(ByVal Selected As DictActions, Optional ByVal KeyID As Variant = Null, Optional ByRef KeyValue As Variant = Null) As Boolean
+Public Function UseDictionary(ByRef dict As Object, ByVal SelectedAction As DictActions, Optional ByVal KeyID As Variant = Null, Optional ByRef KeyValue As Variant = Null) As Boolean
+    On Error GoTo Except
+    Const ProcName As String = "UseDictionary"
     
     ' store values for reference / retrieval
     ' use option daClose when finished to clear
-    
     Dim blnResult As Boolean: blnResult = False
-    Dim K As Variant
     
-    ' make sure KeyId passed for specified actions
-    Select Case Selected
-        Case daAddEntry, daRemoveEntry, daExists
-            If IsNull(KeyID) Or Len(KeyID & "") = 0 Then Exit Function
+    ' make sure dict exists / KeyID passed for specified actions
+    Select Case SelectedAction
+        Case daAddEntry, daExists, daRemoveEntry, daRead, daCount
+            If dict Is Nothing Then RaiseCustomMsg SysDictInit, ProcName
+            If SelectedAction <> daCount Then
+                If IsNull(KeyID) Or Len(KeyID & "") = 0 Then Exit Function
+            End If
     End Select
     
     ' for single, selected action
-    Select Case Selected
-        Case daAddEntry ' add an entry to dict
-            If dict Is Nothing Then
-                Set dict = CreateObject("Scripting.Dictionary")
+    Select Case SelectedAction
+        Case daNew ' create new dictionary
+            If Not dict Is Nothing Then
+                If dict.Count > 0 Then dict.RemoveAll
+                Set dict = Nothing
             End If
+            Set dict = CreateObject("Scripting.Dictionary")
+            blnResult = (Not dict Is Nothing)
             
+        Case daAddEntry ' add entry / update keyvalue in dict
             If Not IsNull(KeyID) Then
                 If dict.Exists(KeyID) Then
                     dict(KeyID) = KeyValue
@@ -49,46 +54,45 @@ Public Function UseDictionary(ByVal Selected As DictActions, Optional ByVal KeyI
                 End If
                 blnResult = True
             End If
-        Case daRemoveEntry ' remove entry from dict
-            If Not dict Is Nothing Then
-                If Not IsNull(KeyID) Then
-                    If dict.Exists(KeyID) Then
-                        dict.Remove (KeyID)
-                        blnResult = True
-                    End If
-                End If
-            End If
-            
+        
         Case daExists ' check existence of dict
-            If Not dict Is Nothing Then
-                If Not IsNull(KeyID) Then
-                    blnResult = dict.Exists(KeyID)
+            If Not IsNull(KeyID) Then
+                blnResult = dict.Exists(KeyID)
+            End If
+            
+        Case daRemoveEntry ' remove entry from dict
+            If Not IsNull(KeyID) Then
+                If dict.Exists(KeyID) Then
+                    dict.Remove KeyID
+                    blnResult = True
                 End If
             End If
             
-        Case daInUse 'is dict instantiated?
+        Case daRead ' read entry, return via ByRef KeyValue
+            If dict.Exists(KeyID) Then
+                KeyValue = dict(KeyID)
+                blnResult = True
+            End If
+            
+        Case daCount ' has stored vals ?
+            If dict.Count > 0 Then blnResult = True
+            
+        Case daInit ' is initialized ?
             blnResult = (Not dict Is Nothing)
             
-        Case daClose, daNew ' remove entries / create new dict
+        Case daClose ' remove entries
             If Not dict Is Nothing Then
                 dict.RemoveAll
                 Set dict = Nothing
-                If Selected = daClose Then
-                    blnResult = True
-                    Exit Function
-                End If
             End If
             blnResult = True
-            
-        Case daRead ' read entry, return via ByRef KeyValue
-            If Not dict Is Nothing Then
-                If dict.Exists(KeyID) Then
-                    KeyValue = dict(KeyID)
-                    blnResult = True
-                End If
-            End If
     End Select
     
     UseDictionary = blnResult
-    
+
+Finally:
+    Exit Function
+Except:
+    ReportExcept Erl, ProcName, ModName
+    Resume Finally
 End Function
